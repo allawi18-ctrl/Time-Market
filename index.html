@@ -4,207 +4,183 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#090b0e">
-<title>سوق العمر — Build 04</title>
+<meta name="theme-color" content="#0a0b0e">
+<title>سوق العمر — Build 05</title>
 <script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"}}
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"}}
 </script>
 <style>
-:root{--gold:#e7bd71;--gold2:#9b6e31;--text:#f5efe6;--muted:#b4bac3;--panel:rgba(10,13,18,.86);--line:rgba(231,189,113,.34)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0c10;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}
-button{font-family:inherit} #app{position:fixed;inset:0;overflow:hidden;background:#11151b;touch-action:none} canvas{display:block;width:100%;height:100%}
-#hud{position:fixed;inset:0;pointer-events:none;z-index:12}.top{position:absolute;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:flex;gap:9px;direction:rtl}
-.card{background:linear-gradient(180deg,rgba(22,26,33,.91),rgba(9,12,17,.84));border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px #0007;backdrop-filter:blur(10px)}
-.life{padding:9px 12px;min-width:205px}.life small,.mission small{font-size:11px;color:#c2b59d}.life strong{display:block;margin-top:1px;color:#f2d496;font-size:17px}.agebar{height:4px;background:#282d34;border-radius:99px;overflow:hidden;margin-top:6px}#agefill{height:100%;width:100%;background:linear-gradient(90deg,#81572a,#f2cb80)}
-.mission{padding:9px 12px;flex:1;max-width:420px}.mission strong{display:block;margin-top:2px;font-size:13px}
-#zone{position:absolute;top:95px;left:50%;transform:translateX(-50%);padding:7px 12px;border-radius:99px;background:#111820dd;border:1px solid #52606e;color:#f0ebe2;font-weight:800;font-size:11px;white-space:nowrap}
-#hint{position:absolute;left:50%;bottom:145px;transform:translateX(-50%);padding:9px 13px;border-radius:13px;background:#0d141ced;border:1px solid #63717f;font-size:13px;font-weight:900;white-space:nowrap;opacity:0;transition:.15s}#hint.show{opacity:1}
-#joy{position:absolute;left:18px;bottom:max(22px,env(safe-area-inset-bottom));width:132px;height:132px;border-radius:50%;background:radial-gradient(circle,#322b21c7,#0d1117cc 72%);border:1px solid #dcb46999;box-shadow:inset 0 0 28px #0009,0 10px 28px #0008;pointer-events:auto;touch-action:none}
-#stick{position:absolute;left:38px;top:38px;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f0c875,#916631 62%,#322719);border:1px solid #ffe3aa;box-shadow:0 0 22px #e6b75f55}.arr{position:absolute;color:#e8c57f99;font-size:20px;font-weight:900}.up{left:56px;top:4px}.down{left:56px;bottom:2px}.left{left:6px;top:55px}.right{right:6px;top:55px}
-#run{position:absolute;left:158px;bottom:max(42px,env(safe-area-inset-bottom));width:76px;height:50px;border-radius:15px;background:#121922df;border:1px solid #66717d;color:white;font-size:13px;font-weight:900;pointer-events:auto}#run.on{background:#9c6d2e;border-color:#efc978}
-#interact{position:absolute;right:18px;bottom:max(31px,env(safe-area-inset-bottom));width:122px;height:78px;border-radius:23px;background:linear-gradient(#e1b45f,#a87633);border:1px solid #f5d69a;color:#171109;font-size:18px;font-weight:900;pointer-events:auto;opacity:.32;transition:.16s;box-shadow:0 9px 28px #0008}#interact.ready{opacity:1;animation:pulse 1.05s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.045);box-shadow:0 0 0 9px #e7bb6b12,0 10px 28px #0008}}
-#bag{position:absolute;right:26px;bottom:126px;width:66px;height:66px;border-radius:50%;background:#101720e8;border:1px solid #d9b36a88;color:#efcc8a;font-size:26px;pointer-events:auto}
-#lookHint{position:absolute;right:14px;top:135px;color:#d8d1c6;font-size:11px;background:#10161dbb;border:1px solid #3d4853;padding:6px 9px;border-radius:10px;opacity:.78}
-#dialog{position:absolute;left:13px;right:13px;bottom:119px;padding:15px;display:none;pointer-events:auto;z-index:14}#speaker{color:var(--gold);font-size:17px;font-weight:900}#dialogText{font-size:17px;line-height:1.75;margin-top:6px}#choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.choice{min-height:47px;border-radius:12px;border:1px solid #43505c;background:#1b2530;color:#fff;font-weight:900}.choice.main{background:linear-gradient(#d6aa57,#9e7132);border-color:#ebc878;color:#171109}
-#inventory{position:absolute;left:18px;right:18px;top:17%;padding:17px;display:none;pointer-events:auto;z-index:15}#inventory h2{margin:0;color:#e8bd71}.item{padding:11px;margin-top:8px;border-radius:12px;border:1px solid #35424e;background:#141c25}.close{width:100%;margin-top:11px;padding:12px;border-radius:12px;background:#1b2530;color:white;border:1px solid #4a5662;font-weight:900}
-#loading{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:24px 20px max(27px,env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 28%,#51391d 0,#171319 35%,#080b0f 72%)}.loadbox{width:min(560px,100%);padding:22px;text-align:center}.loadbox h1{margin:0;color:#e8bd70;font-size:40px}.en{font-size:11px;letter-spacing:4px;color:#aeb4bd}.loadbox p{line-height:1.75;color:#ded7cc}.loadbar{height:6px;background:#242b32;border-radius:99px;overflow:hidden}.loadfill{height:100%;width:8%;background:linear-gradient(90deg,#8f6229,#f0c878);transition:.25s}.start{display:none;width:100%;margin-top:14px;padding:14px;border:0;border-radius:13px;background:linear-gradient(#e0b35e,#a57531);font-size:18px;font-weight:900;color:#171109}.build{margin-top:9px;color:#a8b0ba;font-size:11px}
-#errorBox{display:none;margin-top:10px;color:#ffd1d1;background:#3b1718;border:1px solid #8e4446;padding:9px;border-radius:10px;font-size:12px}
-#flash{position:fixed;inset:0;background:#f2d7a4;opacity:0;pointer-events:none;z-index:30;transition:.15s}#lost{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.82);opacity:0;z-index:31;color:#f2c982;font-size:38px;font-weight:900;text-shadow:0 7px 30px #000;transition:.3s;pointer-events:none}#lost.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-@media(orientation:landscape){#dialog{left:18%;right:18%;bottom:15px}#hint{bottom:101px}.top{left:14px;right:14px}}
+:root{--gold:#e9bd69;--gold2:#9c6c2e;--paper:#f4efe6;--muted:#adb5bf;--panel:rgba(8,12,17,.76);--line:rgba(233,189,105,.32)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0c10;color:var(--paper);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}button{font:inherit}
+#app{position:fixed;inset:0;background:radial-gradient(circle at 50% 32%,#24313b,#0b0d11 70%);touch-action:none}canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;inset:0;z-index:15;pointer-events:none}.top{position:absolute;top:max(8px,env(safe-area-inset-top));left:9px;right:9px;display:flex;gap:7px;direction:rtl}.glass{background:linear-gradient(180deg,rgba(18,23,30,.82),rgba(7,10,14,.70));border:1px solid var(--line);box-shadow:0 8px 25px #0007;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.life{min-width:170px;padding:8px 10px;border-radius:14px}.life small,.mission small{font-size:10px;color:#c3b69d}.life b{display:block;color:#f1d08f;font-size:15px;margin-top:1px}.lifeLine{height:3px;background:#292f36;border-radius:9px;margin-top:5px;overflow:hidden}#lifeFill{height:100%;background:linear-gradient(90deg,#755020,#efc676);width:100%}.mission{flex:1;max-width:330px;padding:8px 10px;border-radius:14px}.mission b{display:block;margin-top:1px;font-size:12px}
+#zone{position:absolute;top:77px;left:50%;transform:translateX(-50%);padding:6px 11px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap;background:#0d141bdd;border:1px solid #566270;box-shadow:0 8px 22px #0005}
+#objective{position:absolute;left:50%;top:108px;transform:translateX(-50%);font-size:11px;color:#ffe0a3;text-shadow:0 2px 10px #000;opacity:.9}
+#joy{position:absolute;left:17px;bottom:max(22px,env(safe-area-inset-bottom));width:120px;height:120px;border-radius:50%;pointer-events:auto;touch-action:none;background:radial-gradient(circle,#3b3020b8,#0c1118ba 70%);border:1px solid #deb26275;box-shadow:inset 0 0 26px #0009,0 10px 25px #0008}#stick{position:absolute;width:50px;height:50px;left:35px;top:35px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f0cb7a,#966832 62%,#2d2419);border:1px solid #f8daa0;box-shadow:0 0 18px #e9b95d4a}.arrow{position:absolute;color:#e8c77d70;font-size:17px;font-weight:900}.up{left:51px;top:4px}.down{left:51px;bottom:2px}.left{left:6px;top:49px}.right{right:6px;top:49px}
+#run{position:absolute;left:147px;bottom:max(39px,env(safe-area-inset-bottom));width:70px;height:46px;border-radius:14px;pointer-events:auto;background:#111821d8;border:1px solid #65717d;color:white;font-size:12px;font-weight:900}#run.on{background:#95662c;border-color:#efc36c}
+#interact{position:absolute;right:18px;bottom:max(28px,env(safe-area-inset-bottom));width:108px;height:70px;border-radius:22px;pointer-events:auto;background:linear-gradient(#e0b05a,#9c6a2b);border:1px solid #f1d08d;color:#171109;font-size:16px;font-weight:900;opacity:.28;box-shadow:0 9px 25px #0008;transition:.15s}#interact.ready{opacity:1;animation:pulse 1.15s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.04);box-shadow:0 0 0 9px #edc16d10,0 10px 28px #0008}}
+#bag{position:absolute;right:28px;bottom:111px;width:58px;height:58px;border-radius:50%;pointer-events:auto;background:#0d141ce8;border:1px solid #deb46675;color:#edc77e;font-size:22px}#hint{position:absolute;left:50%;bottom:126px;transform:translateX(-50%);padding:7px 11px;border-radius:11px;font-size:11px;font-weight:800;background:#0b1118e9;border:1px solid #596674;opacity:0;transition:.15s;white-space:nowrap}#hint.show{opacity:1}
+#dialog{position:absolute;left:12px;right:12px;bottom:150px;padding:14px;max-height:43vh;overflow:auto;border-radius:16px;display:none;pointer-events:auto;z-index:17}#speaker{font-weight:900;color:var(--gold);font-size:16px}#dialogText{font-size:15px;line-height:1.7;margin-top:5px}#choices{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.choice{min-height:44px;border-radius:11px;border:1px solid #3e4955;background:#17212b;color:white;font-weight:900;font-size:13px}.choice.main{background:linear-gradient(#d7aa54,#9e6f2d);border-color:#ecc474;color:#171109}
+#inventory{position:absolute;left:17px;right:17px;top:17%;padding:16px;border-radius:17px;display:none;pointer-events:auto;z-index:18}#inventory h2{margin:0;color:var(--gold);font-size:20px}.item{padding:10px;margin-top:8px;background:#121a23;border:1px solid #35414d;border-radius:11px;font-size:13px}.close{width:100%;padding:11px;margin-top:10px;border-radius:11px;background:#19232d;color:white;border:1px solid #45515d;font-weight:900}
+#loading{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;padding:22px 18px max(26px,env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 25%,#554020 0,#19141a 37%,#080b0f 74%)}.loadCard{width:min(560px,100%);padding:21px;text-align:center;border-radius:20px}.loadCard h1{margin:0;color:#e8bb67;font-size:38px}.en{letter-spacing:4px;color:#aeb6c0;font-size:10px}.loadCard p{line-height:1.65;color:#ded6c8;font-size:13px}.loadbar{height:6px;background:#242b33;border-radius:99px;overflow:hidden}.loadbar>i{display:block;height:100%;width:5%;background:linear-gradient(90deg,#8b5d26,#f1c87b);transition:.25s}.loadStatus{margin-top:8px;color:#aeb6c0;font-size:11px}.start{display:none;width:100%;margin-top:13px;padding:13px;border:0;border-radius:12px;background:linear-gradient(#dfb05a,#a26f2d);color:#171109;font-size:17px;font-weight:900}.error{display:none;margin-top:10px;padding:9px;border-radius:10px;background:#421c1e;border:1px solid #914a4d;color:#ffd5d6;font-size:11px}
+#flash{position:fixed;inset:0;background:#f0d4a1;opacity:0;z-index:40;pointer-events:none;transition:.15s}#lost{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);opacity:0;z-index:41;pointer-events:none;color:#f2c77d;font-size:36px;font-weight:900;text-shadow:0 7px 25px #000;transition:.28s}#lost.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#qaBadge{display:none;position:fixed;z-index:90;left:8px;top:8px;padding:5px 8px;border-radius:8px;background:#11341e;color:#caffd5;font:11px monospace}
+@media(orientation:landscape){.top{left:15px;right:15px}.life{min-width:185px}#dialog{left:18%;right:18%;bottom:14px}#hint{bottom:94px}#zone{top:67px}#objective{top:92px}}
 </style>
-</head><body>
+</head>
+<body>
 <div id="app"></div>
 <div id="hud">
- <div class="top"><div class="life card"><small>العمر المتبقي</small><strong id="life">23 سنة</strong><div class="agebar"><div id="agefill"></div></div></div><div class="mission card"><small>المهمة الحالية</small><strong id="mission">اعثر على تاجر السنوات</strong></div></div>
- <div id="zone">سوق العمر — شارع المصابيح</div><div id="lookHint">اسحب يمين الشاشة لتحريك الكاميرا</div><div id="hint">اضغط «تفاعل»</div>
- <div id="joy"><span class="arr up">↑</span><span class="arr down">↓</span><span class="arr left">←</span><span class="arr right">→</span><div id="stick"></div></div><button id="run">ركض</button><button id="bag">⌛</button><button id="interact">تفاعل</button>
- <div id="dialog" class="card"><div id="speaker"></div><div id="dialogText"></div><div id="choices"></div></div>
- <div id="inventory" class="card"><h2>المخزون</h2><div id="invlist"></div><button id="closeInv" class="close">إغلاق</button></div>
+  <div class="top"><div class="life glass"><small>العمر المتبقي</small><b id="life">23 سنة و4 أشهر و12 يوم</b><div class="lifeLine"><div id="lifeFill"></div></div></div><div class="mission glass"><small>المهمة الحالية</small><b id="mission">ابحث عن تاجر السنوات</b></div></div>
+  <div id="zone">سوق العمر — بوابة المطر</div><div id="objective">◆ اتبع العلامة الذهبية</div><div id="hint">اقترب واضغط «تفاعل»</div>
+  <div id="joy"><span class="arrow up">↑</span><span class="arrow down">↓</span><span class="arrow left">←</span><span class="arrow right">→</span><div id="stick"></div></div>
+  <button id="run">ركض</button><button id="bag">⌛</button><button id="interact">تفاعل</button>
+  <div id="dialog" class="glass"><div id="speaker"></div><div id="dialogText"></div><div id="choices"></div></div>
+  <div id="inventory" class="glass"><h2>المخزون</h2><div id="invlist"></div><button id="closeInv" class="close">إغلاق</button></div>
 </div>
-<div id="loading"><div class="loadbox card"><h1>سوق العمر</h1><div class="en">THE TIME MARKET</div><p>نسخة جديدة: بطل بشري متحرك، تاجر بشري، وسكان يتحركون داخل سوق حي.</p><div class="loadbar"><div id="loadfill" class="loadfill"></div></div><div id="loadText" class="build">تحميل البيئة…</div><div id="errorBox"></div><button id="startBtn" class="start">ابدأ اللعب</button><div class="build">BUILD 04 • LIVING MARKET</div></div></div>
-<div id="flash"></div><div id="lost">− سنة من عمرك</div>
+<div id="loading"><div class="loadCard glass"><h1>سوق العمر</h1><div class="en">THE TIME MARKET</div><p>سوق حي بشخصيات بشرية مختلفة، تاجر مستقل، وحركة واقعية أكثر.</p><div class="loadbar"><i id="loadFill"></i></div><div id="loadStatus" class="loadStatus">تهيئة السوق…</div><div id="error" class="error"></div><button id="startBtn" class="start">ابدأ اللعب</button><div class="loadStatus">BUILD 05 • HUMAN MARKET</div></div></div>
+<div id="flash"></div><div id="lost">− سنة من عمرك</div><div id="qaBadge">QA LAYOUT</div>
+
+<script>
+// Offline layout QA mode used during development. It intentionally avoids loading WebGL/CDN assets.
+if(new URLSearchParams(location.search).get('qa')==='layout'){
+ document.getElementById('loading').style.display='none';document.getElementById('qaBadge').style.display='block';
+ document.getElementById('app').style.background='linear-gradient(180deg,#25323d 0%,#151a20 40%,#18130f 100%)';
+ document.getElementById('objective').textContent='◆ تاجر السنوات — 18 م';
+}
+</script>
 <script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { clone as skeletonClone } from 'three/addons/utils/SkeletonUtils.js';
+if(new URLSearchParams(location.search).get('qa')!=='layout'){
+const boot = async()=>{
+ const THREE=await import('three');
+ const {GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js');
+ const SkeletonUtils=await import('three/addons/utils/SkeletonUtils.js');
+ const {EffectComposer}=await import('three/addons/postprocessing/EffectComposer.js');
+ const {RenderPass}=await import('three/addons/postprocessing/RenderPass.js');
+ const {UnrealBloomPass}=await import('three/addons/postprocessing/UnrealBloomPass.js');
 
-const MODEL_SOLDIER='https://cdn.jsdelivr.net/gh/mrdoob/three.js@r185/examples/models/gltf/Soldier.glb';
-const START_DAYS=23*365+4*30+12;
-const SAVE_KEY='time_market_build04';
-let game=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')||{days:START_DAYS,seal:false,bank:false,black:false};
-function save(){localStorage.setItem(SAVE_KEY,JSON.stringify(game))}
-function fmt(d){let y=Math.floor(d/365);d-=y*365;let m=Math.floor(d/30);d-=m*30;return `${y} سنة و ${m} أشهر و ${Math.floor(d)} يوم`}
+ const BASE='https://cdn.jsdelivr.net/gh/lord3nd3r/ffxi-browser@main/public/models/chars/';
+ const FILES={malePeasant:'Male_Peasant.gltf',maleRanger:'Male_Ranger.gltf',femalePeasant:'Female_Peasant.gltf',femaleRanger:'Female_Ranger.gltf',maleBody:'Superhero_Male_FullBody.gltf',femaleBody:'Superhero_Female_FullBody.gltf',anim:'UAL1_Standard.glb'};
+ const HAIRS=['Hair_Buzzed','Hair_SimpleParted','Hair_Long','Hair_Buns','Hair_Beard'];
+ const START=23*365+4*30+12,SAVE='time_market_build05';
+ let state=JSON.parse(localStorage.getItem(SAVE)||localStorage.getItem('time_market_build04')||'null')||{days:START,seal:false,bank:false,black:false};
+ const $=id=>document.getElementById(id),loadFill=$('loadFill'),loadStatus=$('loadStatus'),errorBox=$('error');
+ const setLoad=(n,t)=>{loadFill.style.width=n+'%';loadStatus.textContent=t};
+ const fmt=d=>{let y=Math.floor(d/365);d-=y*365;let m=Math.floor(d/30);d-=m*30;return `${y} سنة و ${m} أشهر و ${Math.floor(d)} يوم`};
+ const save=()=>localStorage.setItem(SAVE,JSON.stringify(state));
 
-// RENDERER
-const app=document.getElementById('app');
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',alpha:false});
-renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.55));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;app.appendChild(renderer.domElement);
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x202631);scene.fog=new THREE.FogExp2(0x222832,.0165);
-const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,160);camera.position.set(0,3.2,8);
+ // Renderer / cinematic lighting
+ const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',alpha:false});
+ renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.45));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;renderer.outputColorSpace=THREE.SRGBColorSpace;$('app').appendChild(renderer.domElement);
+ const scene=new THREE.Scene();scene.background=new THREE.Color(0x26323e);scene.fog=new THREE.FogExp2(0x202833,.0125);
+ const camera=new THREE.PerspectiveCamera(56,innerWidth/innerHeight,.1,180);camera.position.set(0,3.2,8);
+ const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.32,.22,.82);composer.addPass(bloom);
+ scene.add(new THREE.HemisphereLight(0xc5d5e7,0x6c472d,2.55));
+ const key=new THREE.DirectionalLight(0xd9e7ff,2.7);key.position.set(-9,18,10);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-18;key.shadow.camera.right=18;key.shadow.camera.top=25;key.shadow.camera.bottom=-10;scene.add(key);
+ const rim=new THREE.DirectionalLight(0x789dcc,1.05);rim.position.set(12,8,-35);scene.add(rim);
+ const warmLights=[];function addLantern(x,y,z,p=13){const light=new THREE.PointLight(0xffad48,p,10,1.75);light.position.set(x,y,z);scene.add(light);warmLights.push(light);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.085,9,7),new THREE.MeshBasicMaterial({color:0xffc469}));bulb.position.copy(light.position);scene.add(bulb);return light}
+ for(let z=1;z>-87;z-=7.5){addLantern(-5.15,3.0,z-3,10.5);addLantern(5.15,3.15,z-6.2,11.2)}
 
-// LIGHTING: intentionally brighter than old builds.
-scene.add(new THREE.HemisphereLight(0xb7c8df,0x5d3d25,2.25));
-const moon=new THREE.DirectionalLight(0xcbdcff,2.4);moon.position.set(-10,18,9);moon.castShadow=true;moon.shadow.mapSize.set(1024,1024);moon.shadow.camera.left=-18;moon.shadow.camera.right=18;moon.shadow.camera.top=24;moon.shadow.camera.bottom=-8;scene.add(moon);
-const warmLights=[];
-function lantern(x,y,z,intensity=14){const l=new THREE.PointLight(0xffb24f,intensity,10,1.7);l.position.set(x,y,z);scene.add(l);warmLights.push(l);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6),new THREE.MeshBasicMaterial({color:0xffca6b}));bulb.position.copy(l.position);scene.add(bulb);return l}
-for(let z=0;z>-74;z-=8){lantern(-5.0,3.25,z-3,10.5);lantern(5.0,3.05,z-7,11.5)}
+ // Procedural PBR street texture (no static background).
+ function cobbleTexture(){const c=document.createElement('canvas');c.width=c.height=1024;const g=c.getContext('2d');g.fillStyle='#252b31';g.fillRect(0,0,1024,1024);for(let y=-30;y<1060;y+=74){const shift=(Math.floor(y/74)%2)*48;for(let x=-100;x<1100;x+=96){const xx=x+shift+(Math.random()-.5)*9,yy=y+(Math.random()-.5)*7,w=82+Math.random()*9,h=56+Math.random()*8;g.fillStyle=`hsl(${210+Math.random()*12} 8% ${24+Math.random()*9}%)`;g.beginPath();g.roundRect(xx,yy,w,h,8);g.fill();g.strokeStyle='rgba(5,7,9,.65)';g.lineWidth=7;g.stroke();g.strokeStyle='rgba(135,155,170,.09)';g.lineWidth=2;g.stroke()}}const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2.6,17);t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t}
+ const roadTex=cobbleTexture();const roadMat=new THREE.MeshPhysicalMaterial({map:roadTex,color:0xaab0b4,roughness:.27,metalness:.12,clearcoat:1,clearcoatRoughness:.09});const road=new THREE.Mesh(new THREE.PlaneGeometry(11.3,96),roadMat);road.rotation.x=-Math.PI/2;road.position.z=-39;road.receiveShadow=true;scene.add(road);
+ const stone=new THREE.MeshStandardMaterial({color:0x514a43,roughness:.88});const wood=new THREE.MeshStandardMaterial({color:0x3b2415,roughness:.69});const darkWood=new THREE.MeshStandardMaterial({color:0x21150e,roughness:.76});const roofMat=new THREE.MeshStandardMaterial({color:0x31252a,roughness:.88});const brass=new THREE.MeshStandardMaterial({color:0x9b642b,roughness:.31,metalness:.66});const glassWarm=new THREE.MeshBasicMaterial({color:0xffbc62});
+ function box(w,h,d,mat,x,y,z,parent=scene){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;parent.add(o);return o}
+ for(const x of [-6.05,6.05]) box(1.55,.22,96,stone,x,.1,-39);
+ // puddles
+ const puddleMat=new THREE.MeshPhysicalMaterial({color:0x5b7182,transparent:true,opacity:.18,roughness:.03,metalness:.25,clearcoat:1});for(let i=0;i<36;i++){const p=new THREE.Mesh(new THREE.CircleGeometry(.35+Math.random()*.9,18),puddleMat);p.rotation.x=-Math.PI/2;p.position.set((Math.random()-.5)*8.8,.018,3-Math.random()*85);p.scale.y=.35+Math.random()*.45;scene.add(p)}
 
-// MATERIALS
-const roadMat=new THREE.MeshPhysicalMaterial({color:0x27303a,roughness:.18,metalness:.12,clearcoat:1,clearcoatRoughness:.12});
-const pavementMat=new THREE.MeshStandardMaterial({color:0x4a4540,roughness:.82});
-const plaster=[0x725d4b,0x5e5146,0x675a50,0x4d4f50].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.86}));
-const woodMat=new THREE.MeshStandardMaterial({color:0x422817,roughness:.7});
-const roofMat=new THREE.MeshStandardMaterial({color:0x342520,roughness:.88});
-const metalMat=new THREE.MeshStandardMaterial({color:0x704a22,roughness:.36,metalness:.62});
-const goldGlow=new THREE.MeshBasicMaterial({color:0xf0ba5b});
-function meshBox(w,h,d,mat,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m}
-
-// STREET
-const road=new THREE.Mesh(new THREE.PlaneGeometry(11.2,88),roadMat);road.rotation.x=-Math.PI/2;road.position.z=-35;road.receiveShadow=true;scene.add(road);
-for(const x of [-6,6]){const p=meshBox(1.5,.24,88,pavementMat,x,.1,-35)}
-// Wet irregular patches
-for(let i=0;i<90;i++){const m=new THREE.Mesh(new THREE.CircleGeometry(.18+Math.random()*.7,10),new THREE.MeshPhysicalMaterial({color:0x465464,transparent:true,opacity:.18,roughness:.02,metalness:.2,clearcoat:1}));m.rotation.x=-Math.PI/2;m.position.set((Math.random()-.5)*9.2,.018,5-Math.random()*80);m.scale.y=.3+Math.random()*.7;scene.add(m)}
-
-// Buildings with depth, windows, roofs, awnings.
-function makeBuilding(side,z,index){
- const x=side*8.15,w=4.2+Math.random()*1.1,h=4.8+Math.random()*3.0,d=6.1;
- meshBox(w,h,d,plaster[index%plaster.length],x,h/2,z);
- const roof=new THREE.Mesh(new THREE.ConeGeometry(3.4,1.9,4),roofMat);roof.position.set(x,h+1,z);roof.rotation.y=Math.PI/4;roof.scale.z=.9;roof.castShadow=true;scene.add(roof);
- // Street-facing timber facade (details face the player, not the hidden front/back wall).
- const facadeX=x-side*(w/2+.03);
- for(const oz of [-1.65,0,1.65]) meshBox(.16,h*.82,.16,woodMat,facadeX,.55+h*.4,z+oz);
- for(let yy=1.6;yy<h-1;yy+=1.7) meshBox(.17,.14,d*.76,woodMat,facadeX,yy,z);
- // warm/cool windows directly facing the street
- for(let yy=2;yy<h-1;yy+=2){for(const oz of [-1.3,1.3]){const win=new THREE.Mesh(new THREE.PlaneGeometry(.72,.9),new THREE.MeshBasicMaterial({color:index%3===0?0xffc46c:0x7998bd}));win.position.set(facadeX-side*.015,yy,z+oz);win.rotation.y=side>0?-Math.PI/2:Math.PI/2;scene.add(win)}}
- // market stall at street side
- const stallX=side*5.25;meshBox(2.6,1.15,1.0,woodMat,stallX,.58,z-side*2.0);meshBox(3.2,.14,1.9,metalMat,stallX,2.15,z-side*2.05);
- // hanging sign
- const sign=createSign(index%3===0?'سنوات للبيع':index%3===1?'تبادل العمر':'مزاد الزمن');sign.position.set(side*5.15,3.2,z-side*2.1);sign.rotation.y=side>0?-Math.PI/2:Math.PI/2;scene.add(sign);sign.userData.swing=Math.random()*6;movingSigns.push(sign);
-}
-function createSign(text){const c=document.createElement('canvas');c.width=512;c.height=170;const g=c.getContext('2d');g.fillStyle='#2a190d';g.fillRect(0,0,512,170);g.strokeStyle='#b47a35';g.lineWidth=8;g.strokeRect(8,8,496,154);g.fillStyle='#f2c36d';g.textAlign='center';g.textBaseline='middle';g.direction='rtl';g.font='bold 47px Tahoma,Arial';g.fillText(text,256,87);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(2.6,.86),new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide}))}
-const movingSigns=[];for(let i=0,z=0;z>-78;z-=8,i++){makeBuilding(-1,z-4,i);makeBuilding(1,z-7,i+1)}
-
-// Market props: crates, barrels, hourglasses.
-for(let i=0;i<30;i++){const side=Math.random()>.5?1:-1,x=side*(4.3+Math.random()*1.0),z=-2-Math.random()*73;if(i%2){const b=new THREE.Mesh(new THREE.CylinderGeometry(.34,.38,.75,12),woodMat);b.position.set(x,.38,z);b.castShadow=true;scene.add(b)}else meshBox(.65,.55,.65,woodMat,x,.28,z)}
-function hourglass(x,y,z,s=.6){const g=new THREE.Group(),top=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.09,16),metalMat),bot=top.clone();top.position.y=.62;bot.position.y=-.62;const glass=new THREE.MeshPhysicalMaterial({color:0xffdfab,transparent:true,opacity:.35,roughness:.08,transmission:.2});const a=new THREE.Mesh(new THREE.ConeGeometry(.33,.54,16,1,true),glass);a.position.y=.28;a.rotation.x=Math.PI;const b=a.clone();b.position.y=-.28;b.rotation.x=0;g.add(top,bot,a,b);g.position.set(x,y,z);g.scale.setScalar(s);scene.add(g);return g}
-const hourglasses=[];for(let z=-6;z>-70;z-=11){hourglasses.push(hourglass(-4.55,1.55,z,.55));hourglasses.push(hourglass(4.55,1.55,z-5,.52))}
-
-// BANK at far end
-const bank=new THREE.Group();bank.position.set(0,0,-75);scene.add(bank);
-function bankBox(w,h,d,mat,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;bank.add(m);return m}
-bankBox(13,8,5,new THREE.MeshStandardMaterial({color:0x3d4146,roughness:.62}),0,4,0);bankBox(2,8.5,1.2,metalMat,-4.8,4.25,2.6);bankBox(2,8.5,1.2,metalMat,4.8,4.25,2.6);bankBox(7,1.5,1.2,metalMat,0,7.7,2.6);const door=bankBox(5,5.4,.45,new THREE.MeshStandardMaterial({color:0x181a1d,metalness:.55,roughness:.3}),0,2.7,2.72);const bsign=createSign('بنك العمر');bsign.scale.set(1.3,1.3,1.3);bsign.position.set(0,7.55,3.28);bank.add(bsign);lantern(-3.7,5.8,-71.5,18);lantern(3.7,5.8,-71.5,18);
-// Floating objective marker: starts over the human trader, then moves to the bank.
-const questMarker=new THREE.Group();const qRing=new THREE.Mesh(new THREE.TorusGeometry(.28,.055,8,22),goldGlow);qRing.rotation.x=Math.PI/2;const qCore=new THREE.Mesh(new THREE.OctahedronGeometry(.13),goldGlow);questMarker.add(qRing,qCore);questMarker.position.set(3.7,3.45,-14);questMarker.userData.baseY=3.45;scene.add(questMarker);
-
-// Rain
-const rainCount=1000,rainGeo=new THREE.BufferGeometry(),rp=new Float32Array(rainCount*3);for(let i=0;i<rainCount;i++){rp[i*3]=(Math.random()-.5)*22;rp[i*3+1]=Math.random()*14;rp[i*3+2]=8-Math.random()*92}rainGeo.setAttribute('position',new THREE.BufferAttribute(rp,3));const rain=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xc3d7e5,size:.035,transparent:true,opacity:.5}));scene.add(rain);
-// Steam / mist particles
-const steam=[];for(let i=0;i<26;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(.18+Math.random()*.25,6,5),new THREE.MeshBasicMaterial({color:0xb9c5c9,transparent:true,opacity:.08,depthWrite:false}));p.position.set((Math.random()>.5?1:-1)*(4.5+Math.random()*.5),.3+Math.random(),-3-Math.random()*70);p.userData.base=p.position.y;p.userData.speed=.28+Math.random()*.25;scene.add(p);steam.push(p)}
-
-// MODEL LOADING
-const loader=new GLTFLoader();let soldierSource=null,soldierClips=[];const mixers=[];let player=null,playerMixer=null,playerActions={},activePlayerAction=null,merchant=null,merchantMixer=null;const crowd=[];
-function setProgress(n,t){document.getElementById('loadfill').style.width=n+'%';document.getElementById('loadText').textContent=t}
-function loadGLB(url){return new Promise((resolve,reject)=>loader.load(url,resolve,undefined,reject))}
-function setupModel(root,scale=1,castShadows=true){root.scale.setScalar(scale);root.traverse(o=>{if(o.isMesh){o.castShadow=castShadows;o.receiveShadow=true;if(o.material){o.material=o.material.clone();o.material.roughness=Math.max(.45,o.material.roughness??.7)}}});return root}
-function findClip(clips,name){return clips.find(c=>c.name.toLowerCase()===name.toLowerCase())||clips.find(c=>c.name.toLowerCase().includes(name.toLowerCase()))||clips[0]}
-function makeHuman(source,clips,pos,scale,tint,anim='Idle',tintStrength=.28,castShadows=true){
- const root=setupModel(skeletonClone(source),scale,castShadows);root.position.copy(pos);scene.add(root);const mixer=new THREE.AnimationMixer(root);mixers.push(mixer);const clip=findClip(clips,anim);const action=clip?mixer.clipAction(clip):null;if(action)action.play();if(tint){root.traverse(o=>{if(o.isMesh&&o.material&&o.material.color){o.material.color.lerp(new THREE.Color(tint),tintStrength)}})}return {root,mixer,clips,action,current:anim}
-}
-function switchHuman(h,name){if(h.current===name)return;const clip=name==='Idle'?h.clips[0]:h.clips[3];if(!clip)return;const next=h.mixer.clipAction(clip);next.reset().fadeIn(.2).play();h.action?.fadeOut(.2);h.action=next;h.current=name}
-
-async function loadHumans(){
- setProgress(18,'تحميل البطل البشري…');
- const s=await loadGLB(MODEL_SOLDIER);soldierSource=s.scene;soldierClips=s.animations;
- if(soldierClips.length<4)throw new Error('Human animation set incomplete');
- setProgress(48,'إنشاء التاجر وسكان السوق…');
- // Player: real skinned human; official Soldier clips are Idle[0], Run[1], Walk[3].
- player=setupModel(skeletonClone(soldierSource),1.03);player.position.set(0,0,4);scene.add(player);
- playerMixer=new THREE.AnimationMixer(player);mixers.push(playerMixer);
- playerActions.Idle=playerMixer.clipAction(soldierClips[0]);
- playerActions.Run=playerMixer.clipAction(soldierClips[1]);
- playerActions.Walk=playerMixer.clipAction(soldierClips[3]);
- activePlayerAction=playerActions.Idle;activePlayerAction.play();
- // Merchant: another real animated human, with a distinct warm/brown wardrobe tint and idle animation.
- const mh=makeHuman(soldierSource,soldierClips,new THREE.Vector3(3.7,0,-14),1.06,0x6b3d24,'Idle',.62,true);
- merchant=mh.root;merchantMixer=mh.mixer;merchant.rotation.y=-.55;
-   // Dedicated merchant counter and glowing hourglass so the human trader reads clearly as a shopkeeper.
-   meshBox(2.7,1.05,1.05,woodMat,3.72,.53,-12.75);hourglasses.push(hourglass(3.72,1.55,-12.7,.72));lantern(3.7,3.4,-12.4,15.5);
- // Human crowd. Shared geometry, separate skeletons/animation mixers, varied scale/tints and speeds.
- const colors=[0x704936,0x304b62,0x555235,0x643d49,0x354b5b,0x716346,0x354337,0x51455d];
- for(let i=0;i<9;i++){
-   const h=makeHuman(soldierSource,soldierClips,new THREE.Vector3((i%2?1:-1)*(1.15+Math.random()*1.55),0,-3-Math.random()*62),.91+Math.random()*.10,colors[i%colors.length],'Walk',.34,false);
-   h.root.userData.dir=Math.random()>.5?1:-1;h.root.userData.speed=.52+Math.random()*.50;h.root.userData.pausePhase=Math.random()*8;
-   // Soldier's neutral forward is -Z, so +Z travel needs a 180-degree turn.
-   h.root.rotation.y=h.root.userData.dir>0?Math.PI:0;
-   crowd.push(h);
+ // Richer buildings, awnings, windows and merchandise.
+ const signSwing=[],awnings=[];function signCanvas(text){const c=document.createElement('canvas');c.width=512;c.height=176;const g=c.getContext('2d');g.fillStyle='#24170e';g.fillRect(0,0,512,176);g.strokeStyle='#ba7b37';g.lineWidth=8;g.strokeRect(9,9,494,158);g.fillStyle='#f0c374';g.font='bold 46px Tahoma,Arial';g.textAlign='center';g.textBaseline='middle';g.direction='rtl';g.fillText(text,256,90);const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(2.6,.9),new THREE.MeshStandardMaterial({map:tx,roughness:.7,side:THREE.DoubleSide}))}
+ function stall(side,z,index){const x=side*5.0,group=new THREE.Group();scene.add(group);box(2.8,1.05,1.15,wood,x,.53,z,group);for(const ox of [-1.25,1.25])box(.12,2.35,.12,darkWood,x+ox,.95,z+.15,group);const canopy=new THREE.Mesh(new THREE.BoxGeometry(3.15,.12,1.9),new THREE.MeshStandardMaterial({color:[0x78422f,0x42556d,0x6b5736,0x57405f][index%4],roughness:.88,side:THREE.DoubleSide}));canopy.position.set(x,2.15,z+.15);canopy.rotation.z=side*.04;group.add(canopy);awnings.push({m:canopy,phase:Math.random()*6});
+  // goods
+  for(let k=0;k<8;k++){const col=[0x9e7133,0x7f3d2e,0x536b3f,0x72558a][(k+index)%4];const item=new THREE.Mesh(k%3?new THREE.SphereGeometry(.13+Math.random()*.05,8,6):new THREE.CylinderGeometry(.08,.1,.34,9),new THREE.MeshStandardMaterial({color:col,roughness:.72}));item.position.set(x-1.05+(k%4)*.7,1.15+(k>3?.13:0),z+.1+(k>3?.25:-.2));item.castShadow=true;group.add(item)}
+  const s=signCanvas(index%4===0?'أعمار للبيع':index%4===1?'ساعات نادرة':index%4===2?'مقايضة الزمن':'مزاد السنوات');s.position.set(x-side*.05,3.0,z+.1);s.rotation.y=side>0?-Math.PI/2:Math.PI/2;scene.add(s);s.userData.phase=Math.random()*6;signSwing.push(s);return group}
+ function building(side,z,index){const x=side*(8.0+(index%2)*.15),h=5.2+(index%3)*.65,w=4.5,d=6.6;const mats=[0x6c5b4c,0x5a5149,0x6d6257,0x52575a];const wall=new THREE.MeshStandardMaterial({color:mats[index%mats.length],roughness:.84});box(w,h,d,wall,x,h/2,z);const roof=new THREE.Mesh(new THREE.ConeGeometry(3.45,2.0,4),roofMat);roof.position.set(x,h+1,z);roof.rotation.y=Math.PI/4;roof.scale.z=.96;roof.castShadow=true;scene.add(roof);const fx=x-side*(w/2+.025);for(const dz of [-2.2,0,2.2])box(.14,h*.82,.15,darkWood,fx,.55+h*.41,z+dz);for(let yy=1.4;yy<h;yy+=1.55)box(.15,.13,d*.85,darkWood,fx,yy,z);for(const yy of [2.1,4.0])for(const dz of [-1.45,1.45]){const win=new THREE.Mesh(new THREE.PlaneGeometry(.66,.82),glassWarm);win.position.set(fx-side*.018,yy,z+dz);win.rotation.y=side>0?-Math.PI/2:Math.PI/2;scene.add(win)}
  }
- setProgress(88,'تهيئة السوق والمطر…');
+ for(let i=0,z=-3;z>-84;z-=8.2,i++){building(-1,z,i);building(1,z-3.7,i+1);stall(-1,z-1.2,i);stall(1,z-4.8,i+2)}
+ // props: barrels, crates, cloth rolls
+ for(let i=0;i<42;i++){const side=Math.random()>.5?1:-1,x=side*(4.15+Math.random()*.78),z=1-Math.random()*85;if(i%3===0){const b=new THREE.Mesh(new THREE.CylinderGeometry(.32,.37,.7,12),wood);b.position.set(x,.36,z);b.castShadow=true;scene.add(b)}else if(i%3===1)box(.55,.5,.55,darkWood,x,.25,z);else{const r=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.72,10),new THREE.MeshStandardMaterial({color:[0x7a4b40,0x465c6b,0x75603f][i%3],roughness:.9}));r.rotation.z=Math.PI/2;r.position.set(x,.36,z);scene.add(r)}}
+ // overhead lantern strings
+ for(let z=-8;z>-80;z-=12){const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-5.1,4.1,z),new THREE.Vector3(5.1,4.4,z-.4)]),new THREE.LineBasicMaterial({color:0x66533a,transparent:true,opacity:.7}));scene.add(line);for(let k=1;k<5;k++)addLantern(-5.1+k*2.04,3.9+Math.sin(k)*.12,z-.08*k,4.2)}
+
+ // Bank: bigger landmark, visually distinct.
+ const bank=new THREE.Group();bank.position.set(0,0,-91);scene.add(bank);const bankStone=new THREE.MeshStandardMaterial({color:0x454a50,roughness:.6});const blackMetal=new THREE.MeshStandardMaterial({color:0x121519,metalness:.62,roughness:.28});box(15,10,6,bankStone,0,5,0,bank);for(const x of [-5.4,5.4]){box(2.2,10.8,1.8,brass,x,5.4,3.2,bank);box(.9,12,.9,blackMetal,x,6,3.75,bank)}box(7,6,.55,blackMetal,0,3,3.1,bank);box(7.5,1.6,1.3,brass,0,9.2,3.1,bank);const bankSign=signCanvas('بنك العمر');bankSign.scale.set(1.65,1.65,1.65);bankSign.position.set(0,9.25,3.85);bank.add(bankSign);addLantern(-4.4,6,-86.8,20);addLantern(4.4,6,-86.8,20);
+ const hourRing=new THREE.Mesh(new THREE.TorusGeometry(1.1,.13,12,38),new THREE.MeshStandardMaterial({color:0xcf8e38,emissive:0x7c4114,emissiveIntensity:1.1,metalness:.65,roughness:.25}));hourRing.position.set(0,7.2,3.7);bank.add(hourRing);const hourCore=new THREE.Mesh(new THREE.OctahedronGeometry(.52),new THREE.MeshStandardMaterial({color:0xffc45f,emissive:0xc16f22,emissiveIntensity:2,roughness:.22}));hourCore.position.set(0,7.2,3.7);bank.add(hourCore);
+
+ // Rain streaks and steam.
+ const drops=700,verts=new Float32Array(drops*6);for(let i=0;i<drops;i++){const x=(Math.random()-.5)*24,y=Math.random()*14,z=8-Math.random()*105,o=i*6;verts[o]=x;verts[o+1]=y;verts[o+2]=z;verts[o+3]=x-.06;verts[o+4]=y-.55;verts[o+5]=z+.04}const rainGeo=new THREE.BufferGeometry();rainGeo.setAttribute('position',new THREE.BufferAttribute(verts,3));const rain=new THREE.LineSegments(rainGeo,new THREE.LineBasicMaterial({color:0xc6d9e8,transparent:true,opacity:.28}));scene.add(rain);
+ const steam=[];for(let i=0;i<28;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(.18+Math.random()*.22,7,5),new THREE.MeshBasicMaterial({color:0xc2c9cb,transparent:true,opacity:.06,depthWrite:false}));p.position.set((Math.random()>.5?1:-1)*(4.35+Math.random()*.55),.3+Math.random()*1.0,-2-Math.random()*80);p.userData.base=p.position.y;p.userData.speed=.25+Math.random()*.25;scene.add(p);steam.push(p)}
+
+ // Character assets: fully skinned human bodies + medieval/fantasy outfits + shared UAL animation rig.
+ const loader=new GLTFLoader(),assets={},hairAssets={},mixers=[];
+ const load=url=>new Promise((res,rej)=>loader.load(url,res,undefined,rej));
+ async function preloadHumans(){const jobs=Object.entries(FILES).map(async([k,f])=>{const g=await load(BASE+f);assets[k]=g;return k});let done=0;for(const p of jobs){await p;done++;setLoad(12+done/jobs.length*45,'تحميل الشخصيات البشرية… '+done+'/'+jobs.length)}const hairJobs=HAIRS.slice(0,4).map(async n=>{try{hairAssets[n]=(await load(BASE+'hair/'+n+'.gltf')).scene}catch(e){}});await Promise.all(hairJobs);setLoad(62,'تجهيز الحركات البشرية…')}
+ function clipFind(names){const clips=assets.anim?.animations||[];for(const n of names){const exact=clips.find(c=>c.name.toLowerCase()===n.toLowerCase());if(exact)return exact;const loose=clips.find(c=>c.name.toLowerCase().includes(n.toLowerCase()));if(loose)return loose}return clips[0]}
+ const CLIPS={Idle:()=>clipFind(['Idle_Loop','Idle']),Walk:()=>clipFind(['Walk_Loop','Walk']),Run:()=>clipFind(['Jog_Fwd_Loop','Jog','Run']),Sprint:()=>clipFind(['Sprint_Loop','Sprint','Jog_Fwd_Loop']),Interact:()=>clipFind(['Interact','Wave','Idle_Loop'])};
+ const charConfigs={malePeasant:{outfit:'malePeasant',body:'maleBody',hide:[]},maleRanger:{outfit:'maleRanger',body:'maleBody',hide:['Male_Ranger_Head_Hood']},maleHood:{outfit:'maleRanger',body:'maleBody',hide:[]},femalePeasant:{outfit:'femalePeasant',body:'femaleBody',hide:[]},femaleRanger:{outfit:'femaleRanger',body:'femaleBody',hide:['Female_Ranger_Head_Hood']}};
+ function makeCharacter(kind,appearance={}){const cfg=charConfigs[kind],rig=SkeletonUtils.clone(assets[cfg.outfit].scene),bones={};rig.traverse(o=>{if(o.isBone)bones[o.name]=o});const baseClone=SkeletonUtils.clone(assets[cfg.body].scene),pieces=[];baseClone.traverse(o=>{if(o.isSkinnedMesh)pieces.push(o)});for(const m of pieces){const mapped=m.skeleton.bones.map(b=>bones[b.name]);if(mapped.some(x=>!x))continue;m.skeleton=new THREE.Skeleton(mapped,m.skeleton.boneInverses);m.position.set(0,0,0);m.rotation.set(0,0,0);m.scale.set(1,1,1);if(m.material)m.material=m.material.clone();rig.add(m)}
+  const hidden=new Set(cfg.hide);rig.traverse(o=>{if(hidden.has(o.name))o.visible=false;if(o.isMesh||o.isSkinnedMesh){o.castShadow=appearance.shadow!==false;o.receiveShadow=true;o.frustumCulled=false;if(o.material){o.material=o.material.clone();o.material.roughness=Math.max(.48,o.material.roughness??.7)}}});
+  const head=bones.head||bones.Head;if(head&&appearance.hair&&hairAssets[appearance.hair]){const h=hairAssets[appearance.hair].clone(true);const hm=new THREE.MeshStandardMaterial({color:appearance.hairColor||0x33251f,roughness:.72});h.traverse(o=>{if(o.isMesh){o.material=hm;o.castShadow=appearance.shadow!==false}});rig.add(h);rig.updateMatrixWorld(true);head.attach(h)}
+  // normalize human height rather than guessing asset scale
+  rig.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(rig),height=Math.max(.1,bb.max.y-bb.min.y);const wanted=appearance.height||1.78;rig.scale.setScalar(wanted/height);
+  const mixer=new THREE.AnimationMixer(rig);mixers.push(mixer);const actor={root:rig,mixer,action:null,state:'',speed:1,phase:Math.random()*8,target:null,pause:0};setAnim(actor,'Idle',0);return actor}
+ function setAnim(a,name,fade=.18){if(a.state===name)return;const clip=(CLIPS[name]||CLIPS.Idle)();if(!clip)return;const next=a.mixer.clipAction(clip);next.reset().setEffectiveTimeScale(name==='Walk'?.95:name==='Run'?1.05:name==='Sprint'?1.08:1).fadeIn(fade).play();a.action?.fadeOut(fade);a.action=next;a.state=name}
+
+ let player,merchant,crowd=[],vendors=[];function placeActor(a,x,z,rot=0){a.root.position.set(x,0,z);a.root.rotation.y=rot;scene.add(a.root);return a}
+ function buildPeople(){
+  player=placeActor(makeCharacter('maleRanger',{hair:'Hair_SimpleParted',hairColor:0x211a17,height:1.82}),0,3,Math.PI);
+  merchant=placeActor(makeCharacter('malePeasant',{hair:'Hair_Buzzed',hairColor:0x4a3020,height:1.76}),3.55,-15.2,-.45);setAnim(merchant,'Idle');
+  // second vendors make the market read as inhabited, not a corridor of clones
+  const v1=placeActor(makeCharacter('femalePeasant',{hair:'Hair_Buns',hairColor:0x2f2019,height:1.67,shadow:false}),-4.1,-27,1.15);vendors.push(v1);
+  const v2=placeActor(makeCharacter('femaleRanger',{hair:'Hair_Long',hairColor:0x241a16,height:1.70,shadow:false}),4.1,-48,-1.1);vendors.push(v2);
+  const looks=[['malePeasant','Hair_Buzzed',1.72],['femalePeasant','Hair_Long',1.66],['maleRanger','Hair_SimpleParted',1.84],['femaleRanger','Hair_Buns',1.70],['malePeasant','Hair_SimpleParted',1.77],['femalePeasant','Hair_Buns',1.64],['maleHood',null,1.82],['femaleRanger','Hair_Long',1.72],['malePeasant','Hair_Buzzed',1.80],['femalePeasant','Hair_Long',1.69],['maleRanger','Hair_Buzzed',1.86],['femalePeasant','Hair_Buns',1.62]];
+  looks.forEach((v,i)=>{const a=makeCharacter(v[0],{hair:v[1],hairColor:[0x211914,0x4b3222,0x19191b,0x6a4b2f][i%4],height:v[2],shadow:i<6});a.root.position.set((i%2?1:-1)*(1.1+(i%4)*.72),0,-4-i*5.9);a.root.userData.lane=a.root.position.x;a.root.userData.dir=i%3? -1:1;a.root.userData.walkSpeed=.65+(i%4)*.1;a.root.userData.stopSeed=Math.random()*12;a.root.rotation.y=a.root.userData.dir<0?0:Math.PI;scene.add(a.root);setAnim(a,'Walk');crowd.push(a)});
+ }
+
+ // Dedicated merchant stall and objective marker.
+ box(2.9,1.02,1.12,wood,3.55,.51,-13.9);const merchCanopy=new THREE.Mesh(new THREE.BoxGeometry(3.4,.12,2.0),new THREE.MeshStandardMaterial({color:0x70422e,roughness:.9}));merchCanopy.position.set(3.55,2.35,-14.1);scene.add(merchCanopy);for(const x of [2.15,4.95])box(.12,2.55,.12,darkWood,x,1.1,-14.1);addLantern(3.55,3.05,-13.7,17);
+ const qMat=new THREE.MeshStandardMaterial({color:0xf4c46c,emissive:0xd87c1c,emissiveIntensity:1.5,roughness:.25});const marker=new THREE.Group();const mr=new THREE.Mesh(new THREE.TorusGeometry(.26,.05,8,24),qMat);mr.rotation.x=Math.PI/2;const mc=new THREE.Mesh(new THREE.OctahedronGeometry(.12),qMat);marker.add(mr,mc);marker.position.set(3.55,3.15,-15.0);scene.add(marker);marker.userData.base=3.15;
+
+ // NPC wandering: walk, stop at stalls, look around, continue; simple separation keeps people from forming a rigid line.
+ function updateCrowd(dt,t){for(let i=0;i<crowd.length;i++){const a=crowd[i],u=a.root.userData;if(a.pause>0){a.pause-=dt;setAnim(a,'Idle');a.root.rotation.y+=Math.sin(t*.7+a.phase)*dt*.12;continue}const stopWindow=(t+u.stopSeed)%13;if(stopWindow<.035){a.pause=1.1+Math.random()*2.5;continue}setAnim(a,'Walk');const dz=u.dir*u.walkSpeed*dt;a.root.position.z+=dz; // side-to-side micro wandering
+ a.root.position.x+=(u.lane-a.root.position.x)*dt*.7+Math.sin(t*.35+a.phase)*dt*.05;
+ // avoid nearby crowd and player
+ for(let j=0;j<crowd.length;j++)if(i!==j){const b=crowd[j].root,d=a.root.position.distanceTo(b.position);if(d<.85&&d>.001)a.root.position.x+=(a.root.position.x-b.position.x)/d*dt*.25}
+ if(player){const d=a.root.position.distanceTo(player.root.position);if(d<1.05&&d>.001)a.root.position.x+=(a.root.position.x-player.root.position.x)/d*dt*.4}
+ if(a.root.position.z>4){a.root.position.z=-80;u.dir=1;a.root.rotation.y=Math.PI}else if(a.root.position.z<-82){a.root.position.z=3;u.dir=-1;a.root.rotation.y=0}}
+ }
+
+ // Controls & game state.
+ let running=false,dialog=false,inv=false,sprint=false,joy={x:0,y:0},ptr=null,lookPtr=null,lastX=0,cameraYaw=0,near=null,stepClock=0,audioCtx=null;
+ function updateHUD(){ $('life').textContent=fmt(state.days);$('lifeFill').style.width=Math.max(4,state.days/START*100)+'%';$('mission').textContent=!state.seal?'تحدث مع تاجر السنوات':!state.bank?'اذهب إلى بنك العمر':'اكتشف سر الحساب الواحد';if(!state.seal){marker.visible=true;marker.position.set(3.55,3.15,-15);marker.userData.base=3.15}else if(!state.black){marker.visible=true;marker.position.set(0,11.5,-87.5);marker.userData.base=11.5}else marker.visible=false}
+ function setControlFade(on){for(const id of ['joy','run','bag','interact']){const e=$(id);e.style.opacity=on?'.12':'';e.style.pointerEvents=on?'none':''}}
+ function openDialog(name,text,opts){dialog=true;setControlFade(true);$('dialog').style.display='block';$('speaker').textContent=name;$('dialogText').innerHTML=text;const c=$('choices');c.innerHTML='';opts.forEach((o,i)=>{const b=document.createElement('button');b.className='choice '+(i===0?'main':'');b.textContent=o[0];b.onclick=o[1];c.appendChild(b)});$('hint').classList.remove('show')}
+ function closeDialog(){dialog=false;$('dialog').style.display='none';setControlFade(false)}
+ function loseYear(){state.days-=365;state.seal=true;save();updateHUD();$('flash').style.opacity=.35;setTimeout(()=>$('flash').style.opacity=0,170);$('lost').classList.add('show');setTimeout(()=>$('lost').classList.remove('show'),1350)}
+ $('interact').onclick=()=>{if(dialog||inv||!near)return;if(near==='merchant'){setAnim(merchant,'Interact');openDialog('تاجر السنوات','ختم بنك العمر ثمنه <b style="color:#e9bd69">سنة كاملة من حياتك</b>.',[['ادفع سنة',()=>{if(!state.seal)loseYear();openDialog('تاجر السنوات','خذ الختم. لا تخبر الحراس من أين حصلت عليه.',[['خذ الختم',()=>{setAnim(merchant,'Idle');closeDialog()}]])}],['اسأله عن البنك',()=>openDialog('تاجر السنوات','البنك يشتري الوقت من السوق كله، لكن لا أحد يعرف أين يرسله.',[['رجوع',()=>{setAnim(merchant,'Idle');closeDialog()}]])],['ابتعد',()=>{setAnim(merchant,'Idle');closeDialog()}]])}else if(near==='bank'){if(!state.seal)openDialog('حارس بنك العمر','لا دخول بلا ختم عبور.',[['ابتعد',closeDialog]]);else if(!state.bank)openDialog('حارس بنك العمر','رقم هذا الختم ممسوح من السجل.',[['أظهر الختم',()=>{state.bank=true;save();updateHUD();openDialog('حارس بنك العمر','خلف البنك باب أسود. لم تسمع هذا مني.',[['أكمل',closeDialog]])}],['ابتعد',closeDialog]]);else{state.black=true;save();updateHUD();openDialog('صوت خلف البنك','هناك حساب واحد يستقبل أعمار آلاف الناس. صاحب الحساب لا يظهر اسمه.',[['أكمل',closeDialog]])}}};
+ $('bag').onclick=()=>{inv=true;$('inventory').style.display='block';const a=[];if(state.seal)a.push('<div class="item"><b>ختم بنك العمر</b><br><span style="color:#aeb6c0">اشتريته بسنة من حياتك.</span></div>');if(state.bank)a.push('<div class="item"><b>سر الحارس</b><br><span style="color:#aeb6c0">باب أسود خلف البنك.</span></div>');if(state.black)a.push('<div class="item"><b>الحساب الواحد</b><br><span style="color:#aeb6c0">يجمع أعمار آلاف الناس.</span></div>');$('invlist').innerHTML=a.join('')||'<div class="item" style="color:#aeb6c0">المخزون فارغ.</div>'};$('closeInv').onclick=()=>{inv=false;$('inventory').style.display='none'};
+ $('run').onclick=()=>{sprint=!sprint;$('run').classList.toggle('on',sprint);$('run').textContent=sprint?'ركض ✓':'ركض'};
+ const J=$('joy'),stick=$('stick');function setJoy(x,y){const r=J.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,L=38;let dx=x-cx,dy=y-cy,m=Math.hypot(dx,dy);if(m>L){dx=dx/m*L;dy=dy/m*L}joy.x=dx/L;joy.y=dy/L;stick.style.transform=`translate(${dx}px,${dy}px)`}J.onpointerdown=e=>{ptr=e.pointerId;J.setPointerCapture(ptr);setJoy(e.clientX,e.clientY);e.preventDefault()};J.onpointermove=e=>{if(e.pointerId===ptr){setJoy(e.clientX,e.clientY);e.preventDefault()}};function joyStop(e){if(ptr===null||e.pointerId===ptr){ptr=null;joy.x=joy.y=0;stick.style.transform='translate(0,0)'}}J.onpointerup=joyStop;J.onpointercancel=joyStop;
+ renderer.domElement.addEventListener('pointerdown',e=>{if(e.clientX>innerWidth*.43){lookPtr=e.pointerId;lastX=e.clientX;renderer.domElement.setPointerCapture(e.pointerId)}});renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId===lookPtr){cameraYaw-=(e.clientX-lastX)*.0045;lastX=e.clientX}});renderer.domElement.addEventListener('pointerup',e=>{if(e.pointerId===lookPtr)lookPtr=null});renderer.domElement.addEventListener('pointercancel',e=>{if(e.pointerId===lookPtr)lookPtr=null});
+ function beginAudio(){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();const len=audioCtx.sampleRate*2,buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;const src=audioCtx.createBufferSource(),f=audioCtx.createBiquadFilter(),g=audioCtx.createGain();src.buffer=buf;src.loop=true;f.type='lowpass';f.frequency.value=1800;g.gain.value=.014;src.connect(f).connect(g).connect(audioCtx.destination);src.start()}catch(e){}}
+ function foot(){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),n=audioCtx.currentTime;o.type='triangle';o.frequency.setValueAtTime(90,n);o.frequency.exponentialRampToValueAtTime(44,n+.055);g.gain.setValueAtTime(.017,n);g.gain.exponentialRampToValueAtTime(.0001,n+.075);o.connect(g).connect(audioCtx.destination);o.start(n);o.stop(n+.08)}
+ function collides(next){if(next.x>2.0&&next.x<5.05&&next.z<-14.55&&next.z>-13.25)return true; // merchant counter
+ for(const v of vendors){if(next.distanceTo(v.root.position)<.62)return true}return false}
+
+ const clock=new THREE.Clock();function frame(){requestAnimationFrame(frame);const dt=Math.min(.035,clock.getDelta()),t=performance.now()/1000;mixers.forEach(m=>m.update(dt));updateCrowd(dt,t);vendors.forEach(v=>setAnim(v,'Idle'));warmLights.forEach((l,i)=>l.intensity=(i%3?10.8:5.0)+Math.sin(t*6.5+i)*.45);signSwing.forEach(s=>s.rotation.z=Math.sin(t*.75+s.userData.phase)*.035);awnings.forEach(a=>a.m.rotation.z+=((Math.sin(t*.65+a.phase)*.025)-a.m.rotation.z)*dt*2);hourRing.rotation.z+=dt*.18;hourCore.rotation.y+=dt*.4;marker.rotation.y+=dt*.85;if(marker.visible)marker.position.y=marker.userData.base+Math.sin(t*2.2)*.08;
+  // rain falls as streak segments
+  const ra=rainGeo.attributes.position.array;for(let i=0;i<drops;i++){const o=i*6;ra[o+1]-=dt*11;ra[o+4]-=dt*11;if(ra[o+4]<0){const x=(Math.random()-.5)*24,y=13+Math.random(),z=7-Math.random()*105;ra[o]=x;ra[o+1]=y;ra[o+2]=z;ra[o+3]=x-.06;ra[o+4]=y-.55;ra[o+5]=z+.04}}rainGeo.attributes.position.needsUpdate=true;steam.forEach(p=>{p.position.y+=dt*p.userData.speed;p.material.opacity=.025+.055*Math.max(0,1-(p.position.y-p.userData.base)/2.4);p.scale.setScalar(1+(p.position.y-p.userData.base)*.15);if(p.position.y>p.userData.base+2.4){p.position.y=p.userData.base;p.scale.setScalar(1)}});
+  if(running&&player&&!dialog&&!inv){const moving=Math.abs(joy.x)+Math.abs(joy.y)>.07;if(moving){const sp=sprint?6.1:3.45,fw=new THREE.Vector3(-Math.sin(cameraYaw),0,-Math.cos(cameraYaw)),rt=new THREE.Vector3(Math.cos(cameraYaw),0,-Math.sin(cameraYaw)),mv=fw.multiplyScalar(-joy.y).add(rt.multiplyScalar(joy.x));if(mv.lengthSq()>.001){mv.normalize();const next=player.root.position.clone().addScaledVector(mv,sp*dt);next.x=THREE.MathUtils.clamp(next.x,-4.35,4.35);next.z=THREE.MathUtils.clamp(next.z,-86,4);if(!collides(next))player.root.position.copy(next);const ang=Math.atan2(-mv.x,-mv.z),diff=THREE.MathUtils.euclideanModulo(ang-player.root.rotation.y+Math.PI,Math.PI*2)-Math.PI;player.root.rotation.y+=diff*Math.min(1,dt*9);setAnim(player,sprint?'Run':'Walk');if(t-stepClock>(sprint?.29:.43)){foot();stepClock=t}}}else setAnim(player,'Idle')}
+  near=null;if(player&&merchant&&player.root.position.distanceTo(merchant.root.position)<2.7)near='merchant';const bankPoint=new THREE.Vector3(0,0,-86);if(player&&player.root.position.distanceTo(bankPoint)<4.3)near='bank';$('interact').classList.toggle('ready',!!near);$('hint').classList.toggle('show',!!near&&!dialog&&!inv);
+  if(player){const z=player.root.position.z;$('zone').textContent=z<-72?'بنك العمر — الساحة الأمامية':z<-35?'سوق العمر — الحي الداخلي':'سوق العمر — شارع المطر';const dx=!state.seal?3.55-player.root.position.x:-player.root.position.x,dz=!state.seal?-15-player.root.position.z:-86-player.root.position.z,meters=Math.max(0,Math.round(Math.hypot(dx,dz)));$('objective').textContent=(!state.seal?'◆ تاجر السنوات — ':'◆ بنك العمر — ')+meters+' م';const desired=player.root.position.clone().add(new THREE.Vector3(Math.sin(cameraYaw)*4.65,2.85,Math.cos(cameraYaw)*4.65));camera.position.lerp(desired,1-Math.pow(.002,dt));camera.lookAt(player.root.position.clone().add(new THREE.Vector3(0,1.38,0)))}
+  composer.render()}
+
+ try{setLoad(7,'تهيئة الإضاءة والخامات…');await preloadHumans();setLoad(70,'إنشاء البطل والتاجر وسكان السوق…');buildPeople();setLoad(88,'فحص الحركات والكاميرا…');if(!player||!merchant||crowd.length<10)throw new Error('Character setup incomplete');const required=[CLIPS.Idle(),CLIPS.Walk(),CLIPS.Run()];if(required.some(x=>!x))throw new Error('Required locomotion clips missing');updateHUD();setLoad(100,'جاهز — تم تحميل البشر والحركات');$('startBtn').style.display='block';window.__TM_QA__={assets:Object.keys(assets).length,hairs:Object.keys(hairAssets).length,crowd:crowd.length,clips:(assets.anim?.animations||[]).map(c=>c.name),player:!!player,merchant:!!merchant,state:()=>({...state})}}catch(err){console.error(err);errorBox.style.display='block';errorBox.textContent='تعذر تحميل أحد ملفات الشخصيات أو الحركات. أعد تحميل الصفحة مع اتصال إنترنت ثابت.';loadStatus.textContent='فشل فحص الأصول';return}
+ $('startBtn').onclick=()=>{$('loading').style.display='none';running=true;beginAudio();updateHUD()};frame();addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.45))});
+ };
+ boot().catch(err=>{console.error(err);const e=document.getElementById('error');e.style.display='block';e.textContent='حدث خطأ أثناء تشغيل محرك اللعبة.';document.getElementById('loadStatus').textContent='تعذر تشغيل المحرك'});
 }
-
-// AUDIO: procedural ambience so the market feels alive without large audio downloads.
-let audioCtx=null,stepAt=0;
-function startAudio(){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();const len=audioCtx.sampleRate*2,buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate),data=buf.getChannelData(0);for(let i=0;i<len;i++)data[i]=Math.random()*2-1;const rainSrc=audioCtx.createBufferSource(),rainFilter=audioCtx.createBiquadFilter(),rainGain=audioCtx.createGain();rainSrc.buffer=buf;rainSrc.loop=true;rainFilter.type='lowpass';rainFilter.frequency.value=1500;rainGain.gain.value=.018;rainSrc.connect(rainFilter).connect(rainGain).connect(audioCtx.destination);rainSrc.start();const hum=audioCtx.createOscillator(),hg=audioCtx.createGain();hum.type='sine';hum.frequency.value=55;hg.gain.value=.008;hum.connect(hg).connect(audioCtx.destination);hum.start()}catch(e){audioCtx=null}}
-function footstep(){if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),now=audioCtx.currentTime;o.type='triangle';o.frequency.setValueAtTime(95,now);o.frequency.exponentialRampToValueAtTime(48,now+.055);g.gain.setValueAtTime(.022,now);g.gain.exponentialRampToValueAtTime(.0001,now+.08);o.connect(g).connect(audioCtx.destination);o.start(now);o.stop(now+.085)}
-
-// UI + GAMEPLAY
-let running=false,dialogOpen=false,inventoryOpen=false,sprinting=false,joy={x:0,y:0},cameraYaw=0,pointer=null,lookPointer=null,lookLastX=0,near=null,lastActionName='Idle';
-const life=document.getElementById('life'),mission=document.getElementById('mission'),agefill=document.getElementById('agefill'),hint=document.getElementById('hint'),interact=document.getElementById('interact');
-function updateHUD(){life.textContent=fmt(game.days);agefill.style.width=Math.max(4,game.days/START_DAYS*100)+'%';mission.textContent=!game.seal?'تحدث مع تاجر السنوات':!game.bank?'اذهب إلى بوابة بنك العمر':'اكتشف الحساب الذي يجمع أعمار الناس';if(typeof questMarker!=='undefined'){if(!game.seal){questMarker.visible=true;questMarker.position.set(3.7,3.45,-14);questMarker.userData.baseY=3.45}else if(!game.black){questMarker.visible=true;questMarker.position.set(0,8.9,-71.5);questMarker.userData.baseY=8.9}else questMarker.visible=false}}
-function switchPlayerAction(name){if(name===lastActionName||!playerActions[name])return;const next=playerActions[name];next.reset().fadeIn(.16).play();activePlayerAction?.fadeOut(.16);activePlayerAction=next;lastActionName=name}
-function openDialog(name,text,options){dialogOpen=true;document.getElementById('dialog').style.display='block';document.getElementById('speaker').textContent=name;document.getElementById('dialogText').innerHTML=text;const c=document.getElementById('choices');c.innerHTML='';options.forEach((o,i)=>{const b=document.createElement('button');b.className='choice '+(i===0?'main':'');b.textContent=o[0];b.onclick=o[1];c.appendChild(b)});hint.classList.remove('show')}
-function closeDialog(){dialogOpen=false;document.getElementById('dialog').style.display='none'}
-function loseYear(){game.days-=365;game.seal=true;save();updateHUD();const f=document.getElementById('flash'),l=document.getElementById('lost');f.style.opacity=.35;setTimeout(()=>f.style.opacity=0,180);l.classList.add('show');setTimeout(()=>l.classList.remove('show'),1400)}
-function interactNow(){if(dialogOpen||inventoryOpen||!near)return;if(near==='merchant'){openDialog('تاجر السنوات','الختم الذي يسمح لك بدخول بنك العمر ثمنه <b style="color:#e7bd71">سنة واحدة من حياتك</b>.',[['ادفع سنة',()=>{if(!game.seal)loseYear();openDialog('تاجر السنوات','خذ الختم. عندما تصل إلى البنك، لا تقل لهم من باعك إياه.',[['خذ الختم',()=>closeDialog()]])}],['اسأله أين تذهب السنوات',()=>openDialog('تاجر السنوات','لو كنت أعرف لما بقيت أبيعها هنا. لكن كل الطرق تنتهي عند بنك العمر.',[['رجوع',()=>closeDialog()]])],['ابتعد',()=>closeDialog()]])}else if(near==='bank'){if(!game.seal)openDialog('حارس بنك العمر','الدخول ممنوع بدون ختم عبور.',[['ابتعد',()=>closeDialog()]]);else if(!game.bank)openDialog('حارس بنك العمر','ختمك حقيقي… لكن رقمه ممسوح من السجل.',[['أظهر الختم',()=>{game.bank=true;save();updateHUD();openDialog('حارس بنك العمر','هناك باب خلف البنك. لم أقل لك ذلك.',[['أكمل',()=>closeDialog()]])}],['ابتعد',()=>closeDialog()]]);else{game.black=true;save();updateHUD();openDialog('صوت من خلف البنك','هناك حساب واحد يستقبل سنوات آلاف الناس. صاحب الحساب لا يظهر اسمه لأي موظف.',[['أكمل',()=>closeDialog()]])}}}
-interact.onclick=interactNow;
-// inventory
-document.getElementById('bag').onclick=()=>{inventoryOpen=true;document.getElementById('inventory').style.display='block';let a=[];if(game.seal)a.push('<div class="item"><b>ختم عبور بنك العمر</b><br><span style="color:#b4bac3">دفعته بسنة من عمرك.</span></div>');if(game.bank)a.push('<div class="item"><b>معلومة الحارس</b><br><span style="color:#b4bac3">هناك باب مخفي خلف البنك.</span></div>');if(game.black)a.push('<div class="item"><b>الحساب الواحد</b><br><span style="color:#b4bac3">حساب مجهول يجمع سنوات آلاف الناس.</span></div>');if(!a.length)a.push('<div class="item" style="color:#b4bac3">المخزون فارغ.</div>');document.getElementById('invlist').innerHTML=a.join('')};document.getElementById('closeInv').onclick=()=>{inventoryOpen=false;document.getElementById('inventory').style.display='none'};
-document.getElementById('run').onclick=()=>{sprinting=!sprinting;document.getElementById('run').classList.toggle('on',sprinting);document.getElementById('run').textContent=sprinting?'ركض ✓':'ركض'};
-// joystick
-const J=document.getElementById('joy'),stick=document.getElementById('stick');function joyPos(x,y){const r=J.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,L=42;let dx=x-cx,dy=y-cy,m=Math.hypot(dx,dy);if(m>L){dx=dx/m*L;dy=dy/m*L}joy.x=dx/L;joy.y=dy/L;stick.style.transform=`translate(${dx}px,${dy}px)`}J.onpointerdown=e=>{pointer=e.pointerId;J.setPointerCapture(e.pointerId);joyPos(e.clientX,e.clientY);e.preventDefault()};J.onpointermove=e=>{if(e.pointerId===pointer){joyPos(e.clientX,e.clientY);e.preventDefault()}};function stopJoy(e){if(pointer===null||e.pointerId===pointer){pointer=null;joy.x=joy.y=0;stick.style.transform='translate(0,0)'}}J.onpointerup=stopJoy;J.onpointercancel=stopJoy;
-// camera look on right half of screen
-renderer.domElement.addEventListener('pointerdown',e=>{if(e.clientX>innerWidth*.42){lookPointer=e.pointerId;lookLastX=e.clientX;renderer.domElement.setPointerCapture(e.pointerId)}});renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId===lookPointer){const dx=e.clientX-lookLastX;lookLastX=e.clientX;cameraYaw-=dx*.005}});renderer.domElement.addEventListener('pointerup',e=>{if(e.pointerId===lookPointer)lookPointer=null});renderer.domElement.addEventListener('pointercancel',e=>{if(e.pointerId===lookPointer)lookPointer=null});
-
-const clock=new THREE.Clock();let camPos=new THREE.Vector3();
-function animate(){requestAnimationFrame(animate);const dt=Math.min(.04,clock.getDelta()),t=performance.now()/1000;for(const m of mixers)m.update(dt);
- // lights, props and atmosphere
- warmLights.forEach((l,i)=>l.intensity=10.8+Math.sin(t*7+i*1.5)*.7+Math.sin(t*17+i)*.2);questMarker.rotation.y+=dt*.9;if(questMarker.visible)questMarker.position.y=questMarker.userData.baseY+Math.sin(t*2.2)*.08;movingSigns.forEach(s=>s.rotation.z=Math.sin(t*.8+s.userData.swing)*.045);hourglasses.forEach((h,i)=>h.rotation.y+=dt*(.22+(i%3)*.04));steam.forEach(p=>{p.position.y+=dt*p.userData.speed;p.material.opacity=.03+.08*Math.max(0,1-(p.position.y-p.userData.base)/2.5);if(p.position.y>p.userData.base+2.5)p.position.y=p.userData.base});for(let i=0;i<rainCount;i++){rp[i*3+1]-=dt*(8+(i%7)*.4);rp[i*3]-=dt*.7;if(rp[i*3+1]<0){rp[i*3+1]=14;rp[i*3]=(Math.random()-.5)*22}}rain.geometry.attributes.position.needsUpdate=true;
- // crowd locomotion actual animated humans
- for(const h of crowd){const walking=((t+h.root.userData.pausePhase)%8)<6.1;switchHuman(h,walking?'Walk':'Idle');if(walking){h.root.position.z+=h.root.userData.dir*h.root.userData.speed*dt;if(h.root.position.z>5){h.root.position.z=-70;h.root.userData.dir=1;h.root.rotation.y=Math.PI}else if(h.root.position.z<-72){h.root.position.z=4;h.root.userData.dir=-1;h.root.rotation.y=0}}}
- if(running&&player&&!dialogOpen&&!inventoryOpen){const moving=Math.abs(joy.x)+Math.abs(joy.y)>.07;if(moving){const speed=sprinting?6.4:3.55;const camForward=new THREE.Vector3(-Math.sin(cameraYaw),0,-Math.cos(cameraYaw));const camRight=new THREE.Vector3(Math.cos(cameraYaw),0,-Math.sin(cameraYaw));const mv=camForward.multiplyScalar(-joy.y).add(camRight.multiplyScalar(joy.x));if(mv.lengthSq()>.001){mv.normalize();const next=player.position.clone().addScaledVector(mv,speed*dt);next.x=THREE.MathUtils.clamp(next.x,-4.35,4.35);next.z=THREE.MathUtils.clamp(next.z,-70,5);/* don't walk through the trader's counter */const hitsCounter=next.x>2.15&&next.x<4.35&&next.z<-11.75&&next.z>-13.75;if(!hitsCounter)player.position.copy(next);if(t-stepAt>(sprinting?.28:.42)){footstep();stepAt=t;}const targetRot=Math.atan2(-mv.x,-mv.z);let diff=THREE.MathUtils.euclideanModulo(targetRot-player.rotation.y+Math.PI,Math.PI*2)-Math.PI;player.rotation.y+=diff*Math.min(1,dt*9);switchPlayerAction(sprinting?'Run':'Walk')}}else switchPlayerAction('Idle')}
- // interaction ranges
- near=null;if(player&&merchant&&player.position.distanceTo(merchant.position)<3.0)near='merchant';const bankWorld=new THREE.Vector3(0,0,-70);if(player&&player.position.distanceTo(bankWorld)<4.5)near='bank';interact.classList.toggle('ready',!!near);hint.classList.toggle('show',!!near&&!dialogOpen&&!inventoryOpen);
- // zone
- if(player){document.getElementById('zone').textContent=player.position.z<-55?'بنك العمر — الساحة الأمامية':player.position.z<-28?'سوق العمر — الممر الداخلي':'سوق العمر — شارع المصابيح';
- // camera follow with independent look offset
- const desired=player.position.clone().add(new THREE.Vector3(Math.sin(cameraYaw)*4.6,2.8,Math.cos(cameraYaw)*4.6));camera.position.lerp(desired,1-Math.pow(.002,dt));camera.lookAt(player.position.clone().add(new THREE.Vector3(0,1.45,0)))}
- renderer.render(scene,camera)}
-animate();
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.55))});
-
-// LOAD + START
-(async()=>{try{setProgress(8,'تحميل البيئة…');await new Promise(r=>setTimeout(r,120));await loadHumans();setProgress(100,'جاهز');updateHUD();document.getElementById('startBtn').style.display='block'}catch(err){console.error(err);document.getElementById('errorBox').style.display='block';document.getElementById('errorBox').textContent='تعذر تحميل النماذج ثلاثية الأبعاد. تحقق من اتصال الإنترنت ثم أعد فتح الصفحة.';document.getElementById('loadText').textContent='حدث خطأ في التحميل'}})();
-document.getElementById('startBtn').onclick=()=>{document.getElementById('loading').style.display='none';running=true;startAudio();updateHUD()};
-updateHUD();
-window.__TM_TEST__={getState:()=>({...game}),fmt,MODEL_SOLDIER,getCounts:()=>({crowd:crowd.length,mixers:mixers.length,hourglasses:hourglasses.length,lights:warmLights.length}),getRuntime:()=>({playerLoaded:!!player,merchantLoaded:!!merchant,near,cameraYaw})};
-</script></body></html>
+</script>
+</body></html>
