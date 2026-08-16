@@ -13,11 +13,10 @@ const errors=[];
 page.on('console',m=>{ if(m.type()==='error') errors.push('console: '+m.text()); });
 page.on('pageerror',e=>errors.push('pageerror: '+e.message));
 await page.goto('http://127.0.0.1:8000/qa/build06.html',{waitUntil:'domcontentloaded',timeout:120000});
-await page.waitForFunction(()=>window.__TM_READY__===true,{timeout:120000});
+await page.waitForFunction(()=>window.__TM_READY__===true,null,{timeout:150000});
 await page.waitForTimeout(3500);
 await page.screenshot({path:'qa-output/build06-ingame-01.png',fullPage:false});
 
-// Actual movement recording: walk then run and turn.
 await page.keyboard.down('w');
 await page.waitForTimeout(1800);
 await page.keyboard.up('w');
