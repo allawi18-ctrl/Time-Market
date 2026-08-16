@@ -25,11 +25,26 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Download rainy night environment
+      - name: Prepare true-night rainy environment
         run: |
           mkdir -p qa-assets/hdri
-          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/vignaioli_night_1k.hdr'
+          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/vignaioli_night_4k.hdr'
           curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/vignaioli_night.jpg'
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image, ImageEnhance
+          p='qa-assets/hdri/vignaioli_night.jpg'
+          im=Image.open(p).convert('RGB')
+          im=ImageEnhance.Brightness(im).enhance(0.30)
+          im=ImageEnhance.Contrast(im).enhance(1.18)
+          im=ImageEnhance.Color(im).enhance(0.82)
+          px=im.load()
+          for y in range(im.height):
+              for x in range(im.width):
+                  r,g,b=px[x,y]
+                  px[x,y]=(int(r*0.82),int(g*0.88),min(255,int(b*1.04)))
+          im.save(p,quality=93,optimize=True)
+          PY
           ls -lh qa-assets/hdri/
       - name: Download better Rocketbox humans and motions
         run: |
@@ -51,12 +66,12 @@ jobs:
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real Build 14 gameplay QA
+      - name: Capture real Build 15 gameplay QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: time-market-build14-visual-qa
+          name: time-market-build15-visual-qa
           path: qa-output/
           retention-days: 7
