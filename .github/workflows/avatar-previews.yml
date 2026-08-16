@@ -1,0 +1,32 @@
+name: Avatar Preview Sampler
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/avatar-previews.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Rocketbox outfit previews
+        run: |
+          mkdir -p qa-preview/male qa-preview/female
+          base='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults'
+          for i in $(seq -w 1 20); do
+            curl -L --silent --fail -o "qa-preview/male/Male_Adult_${i}.png" "$base/Male_Adult_${i}/Male_Adult_${i}.png" || true
+            curl -L --silent --fail -o "qa-preview/female/Female_Adult_${i}.png" "$base/Female_Adult_${i}/Female_Adult_${i}.png" || true
+          done
+          find qa-preview -type f -maxdepth 2 -print
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rocketbox-outfit-previews
+          path: qa-preview/
+          retention-days: 7
