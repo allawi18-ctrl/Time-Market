@@ -32,17 +32,14 @@ jobs:
           curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/vignaioli_night.jpg'
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
-          from PIL import Image, ImageEnhance
+          from PIL import Image, ImageEnhance, ImageChops
           p='qa-assets/hdri/vignaioli_night.jpg'
           im=Image.open(p).convert('RGB')
           im=ImageEnhance.Brightness(im).enhance(0.30)
           im=ImageEnhance.Contrast(im).enhance(1.18)
           im=ImageEnhance.Color(im).enhance(0.82)
-          px=im.load()
-          for y in range(im.height):
-              for x in range(im.width):
-                  r,g,b=px[x,y]
-                  px[x,y]=(int(r*0.82),int(g*0.88),min(255,int(b*1.04)))
+          tint=Image.new('RGB',im.size,(210,225,255))
+          im=ImageChops.multiply(im,tint)
           im.save(p,quality=93,optimize=True)
           PY
           ls -lh qa-assets/hdri/
