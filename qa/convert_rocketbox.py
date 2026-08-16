@@ -1,4 +1,4 @@
-import bpy, os, sys, re
+import bpy, os, sys
 
 args = sys.argv[sys.argv.index('--') + 1:]
 fbx_path = os.path.abspath(args[0])
@@ -8,7 +8,7 @@ run_path = os.path.abspath(args[3]) if len(args) > 3 and args[3] else None
 textures_dir = os.path.abspath(os.path.join(os.path.dirname(fbx_path), '..', 'Textures'))
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
-bpy.ops.import_scene.fbx(filepath=fbx_path, use_image_search=True, automatic_bone_orientation=True)
+bpy.ops.import_scene.fbx(filepath=fbx_path, use_image_search=False, automatic_bone_orientation=True)
 
 avatar_armatures = [o for o in bpy.context.scene.objects if o.type == 'ARMATURE']
 if not avatar_armatures:
@@ -17,54 +17,109 @@ avatar_arm = max(avatar_armatures, key=lambda o: len(o.data.bones))
 print('AVATAR_ARMATURE', avatar_arm.name, 'BONES', len(avatar_arm.data.bones))
 print('ROOT_BONES', [b.name for b in avatar_arm.data.bones if b.parent is None])
 
-# Repair external texture paths.
-for img in bpy.data.images:
-    if not img or img.name == 'Render Result':
-        continue
-    raw = bpy.path.abspath(img.filepath) if img.filepath else ''
-    if raw and os.path.exists(raw):
-        continue
-    base = os.path.basename(raw or img.name)
-    cand = os.path.join(textures_dir, base)
-    if os.path.exists(cand):
-        img.filepath = cand
+# Infer the Rocketbox texture prefix directly from the imported material names.
+prefix = None
+for mat in bpy.data.materials:
+    if mat and '_' in mat.name:
+        p = mat.name.split('_', 1)[0].lower()
+        if p.startswith(('m', 'f')) and len(p) == 4:
+            prefix = p
+            break
+if not prefix:
+    raise RuntimeError('Could not infer Rocketbox texture prefix')
+print('TEXTURE_PREFIX', prefix)
+
+
+def load_img(filename, non_color=False):
+    path = os.path.join(textures_dir, filename)
+    if not os.path.exists(path):
+        print('MISSING_TEXTURE', path)
+        return None
+    img = bpy.data.images.load(path, check_existing=True)
+    img.name = filename
+    if non_color:
         try:
-            img.reload()
+            img.colorspace_settings.name = 'Non-Color'
         except Exception:
             pass
+    print('LOADED_TEXTURE', filename, img.size[:])
+    return img
 
-# Rocketbox's legacy opacity maps were being interpreted as transparent stripes on
-# clothes/body in WebGL. Force opaque PBR for body/clothes; preserve alpha clipping
-# only for obvious hair/eyelash materials.
+body_color = load_img(f'{prefix}_body_color.tga')
+body_normal = load_img(f'{prefix}_body_normal.tga', True)
+head_color = load_img(f'{prefix}_head_color.tga')
+head_normal = load_img(f'{prefix}_head_normal.tga', True)
+opacity_color = load_img(f'{prefix}_opacity_color.tga')
+
+
+def rebuild_material(mat, kind):
+    mat.use_nodes = True
+    nt = mat.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new('ShaderNodeOutputMaterial')
+    bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
+    out.location = (520, 0)
+    bsdf.location = (220, 0)
+    nt.links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    bsdf.inputs['Roughness'].default_value = 0.56 if kind in ('body', 'head') else 0.68
+    bsdf.inputs['Metallic'].default_value = 0.0
+    if 'Specular IOR Level' in bsdf.inputs:
+        bsdf.inputs['Specular IOR Level'].default_value = 0.22
+
+    if kind == 'head':
+        color_img, normal_img = head_color, head_normal
+    elif kind == 'body':
+        color_img, normal_img = body_color, body_normal
+    else:
+        color_img, normal_img = opacity_color, None
+
+    if color_img:
+        tex = nt.nodes.new('ShaderNodeTexImage')
+        tex.image = color_img
+        tex.location = (-430, 90)
+        nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+        if kind == 'opacity':
+            # Rocketbox's opacity sheet contains hair/eyebrow/eyelash geometry.
+            # Use either image alpha or luminance as a conservative alpha mask.
+            nt.links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
+
+    if normal_img:
+        texn = nt.nodes.new('ShaderNodeTexImage')
+        texn.image = normal_img
+        texn.location = (-430, -180)
+        normal = nt.nodes.new('ShaderNodeNormalMap')
+        normal.inputs['Strength'].default_value = 0.48
+        normal.location = (-80, -170)
+        nt.links.new(texn.outputs['Color'], normal.inputs['Color'])
+        nt.links.new(normal.outputs['Normal'], bsdf.inputs['Normal'])
+
+    try:
+        if kind == 'opacity':
+            mat.blend_method = 'CLIP'
+            mat.alpha_threshold = 0.28
+            mat.show_transparent_back = True
+        else:
+            mat.blend_method = 'OPAQUE'
+            mat.show_transparent_back = False
+    except Exception:
+        pass
+    print('REBUILT_MATERIAL', mat.name, kind)
+
+
 for mat in bpy.data.materials:
     if not mat:
         continue
-    mat.use_nodes = True
-    name = (mat.name or '').lower()
-    alpha_surface = any(k in name for k in ('hair', 'lash', 'brow'))
-    try:
-        mat.blend_method = 'CLIP' if alpha_surface else 'OPAQUE'
-        mat.alpha_threshold = 0.35
-        mat.show_transparent_back = alpha_surface
-    except Exception:
-        pass
-    bsdf = mat.node_tree.nodes.get('Principled BSDF') if mat.node_tree else None
-    if bsdf:
-        if 'Roughness' in bsdf.inputs:
-            bsdf.inputs['Roughness'].default_value = 0.58
-        if 'Metallic' in bsdf.inputs:
-            bsdf.inputs['Metallic'].default_value = 0.0
-        if 'Specular IOR Level' in bsdf.inputs:
-            bsdf.inputs['Specular IOR Level'].default_value = 0.24
-        if 'Alpha' in bsdf.inputs and not alpha_surface:
-            alpha = bsdf.inputs['Alpha']
-            for link in list(alpha.links):
-                mat.node_tree.links.remove(link)
-            alpha.default_value = 1.0
-    print('MATERIAL', mat.name, 'ALPHA_SURFACE', alpha_surface)
+    n = mat.name.lower()
+    if '_head' in n:
+        rebuild_material(mat, 'head')
+    elif '_opacity' in n:
+        rebuild_material(mat, 'opacity')
+    else:
+        rebuild_material(mat, 'body')
 
 root_names = [b.name for b in avatar_arm.data.bones if b.parent is None]
 root_name = root_names[0] if root_names else None
+
 
 def import_motion(path, clip_name):
     if not path or not os.path.exists(path):
@@ -84,12 +139,24 @@ def import_motion(path, clip_name):
     action.name = clip_name
     action.use_fake_user = True
     print('ACTION', clip_name, 'FCURVES', len(action.fcurves), 'RANGE', tuple(action.frame_range))
-    # Remove horizontal root motion. The game moves the character root itself.
+
+    # Critical: remove ALL pelvis translation channels. Leaving the third channel
+    # caused the previous QA models to shoot out of frame / sink into the ground.
     if root_name:
+        root_loc = f'pose.bones["{root_name}"].location'
+        removed = 0
         for fc in list(action.fcurves):
-            if fc.data_path == 'pose.bones["%s"].location' % root_name and fc.array_index in (0, 1):
+            if fc.data_path == root_loc:
                 action.fcurves.remove(fc)
-    # Imported animation helper armature is no longer needed; keep the Action datablock.
+                removed += 1
+        print('REMOVED_ROOT_LOCATION_CURVES', clip_name, removed)
+
+    # Also discard object-level translation if the FBX importer stored motion there.
+    for fc in list(action.fcurves):
+        if fc.data_path == 'location':
+            action.fcurves.remove(fc)
+            print('REMOVED_OBJECT_LOCATION_CURVE', clip_name, fc.array_index)
+
     for o in new_objs:
         bpy.data.objects.remove(o, do_unlink=True)
     return action
@@ -97,7 +164,6 @@ def import_motion(path, clip_name):
 walk_action = import_motion(walk_path, 'Walk')
 run_action = import_motion(run_path, 'Run')
 
-# Store clips as NLA tracks on the avatar armature so glTF exports named animation clips.
 avatar_arm.animation_data_create()
 avatar_arm.animation_data.action = None
 for action in (walk_action, run_action):
@@ -111,7 +177,6 @@ for action in (walk_action, run_action):
     strip.action_frame_start = action.frame_range[0]
     strip.action_frame_end = action.frame_range[1]
 
-# Select only the avatar hierarchy before export.
 bpy.ops.object.select_all(action='DESELECT')
 avatar_arm.select_set(True)
 for obj in bpy.context.scene.objects:
