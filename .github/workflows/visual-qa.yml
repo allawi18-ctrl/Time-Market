@@ -48,13 +48,11 @@ jobs:
           du -sh qa-assets/rocket
       - name: Convert Rocketbox humans to GLB
         run: |
-          if ! command -v blender >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y blender
-          fi
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player.glb
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant.glb
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female.glb
+          sudo apt-get update -qq
+          sudo apt-get install -y blender python3-numpy
+          PYTHONPATH=/usr/lib/python3/dist-packages blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player.glb
+          PYTHONPATH=/usr/lib/python3/dist-packages blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant.glb
+          PYTHONPATH=/usr/lib/python3/dist-packages blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female.glb
           ls -lh qa-assets/rocket/*.glb
       - name: Run local server
         run: |
