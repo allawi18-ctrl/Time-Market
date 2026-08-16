@@ -14,7 +14,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 16
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,22 +25,22 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Download realistic market lighting and background
+      - name: Download rainy night environment
         run: |
           mkdir -p qa-assets/hdri
-          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/leadenhall_market_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/leadenhall_market_1k.hdr'
-          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/leadenhall_market.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/leadenhall_market.jpg'
+          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/vignaioli_night_1k.hdr'
+          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/vignaioli_night.jpg'
           ls -lh qa-assets/hdri/
-      - name: Download original Rocketbox humans, textures and motions
+      - name: Download better Rocketbox humans and motions
         run: |
           set -e
           base='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults'
           anim='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Animations/all_animations_max_motextr_xy'
           mkdir -p qa-assets/rocket/player/{Export,Textures} qa-assets/rocket/merchant/{Export,Textures} qa-assets/rocket/female/{Export,Textures} qa-assets/rocket/anims
-          curl -L --fail --retry 3 -o qa-assets/rocket/player/Export/Male_Adult_01.fbx "$base/Male_Adult_01/Export/Male_Adult_01.fbx"
-          for f in m002_body_color.tga m002_body_normal.tga m002_head_color.tga m002_head_normal.tga m002_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/player/Textures/$f" "$base/Male_Adult_01/Textures/$f"; done
-          curl -L --fail --retry 3 -o qa-assets/rocket/merchant/Export/Male_Adult_02.fbx "$base/Male_Adult_02/Export/Male_Adult_02.fbx"
-          for f in m003_body_color.tga m003_body_normal.tga m003_head_color.tga m003_head_normal.tga m003_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/merchant/Textures/$f" "$base/Male_Adult_02/Textures/$f"; done
+          curl -L --fail --retry 3 -o qa-assets/rocket/player/Export/Male_Adult_03.fbx "$base/Male_Adult_03/Export/Male_Adult_03.fbx"
+          for f in m004_body_color.tga m004_body_normal.tga m004_head_color.tga m004_head_normal.tga m004_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/player/Textures/$f" "$base/Male_Adult_03/Textures/$f"; done
+          curl -L --fail --retry 3 -o qa-assets/rocket/merchant/Export/Male_Adult_19.fbx "$base/Male_Adult_19/Export/Male_Adult_19.fbx"
+          for f in m250_body_color.tga m250_body_normal.tga m250_head_color.tga m250_head_normal.tga m250_keffiyeh_color.tga m250_keffiyeh_normal.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/merchant/Textures/$f" "$base/Male_Adult_19/Textures/$f"; done
           curl -L --fail --retry 3 -o qa-assets/rocket/female/Export/Female_Adult_01.fbx "$base/Female_Adult_01/Export/Female_Adult_01.fbx"
           for f in f001_body_color.tga f001_body_normal.tga f001_head_color.tga f001_head_normal.tga f001_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/female/Textures/$f" "$base/Female_Adult_01/Textures/$f"; done
           curl -L --fail --retry 3 -o qa-assets/rocket/anims/m_walk.fbx "$anim/m_walk_neutral.max.fbx"
@@ -51,12 +51,12 @@ jobs:
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real Build 13 gameplay QA
+      - name: Capture real Build 14 gameplay QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: time-market-build13-visual-qa
+          name: time-market-build14-visual-qa
           path: qa-output/
           retention-days: 7
