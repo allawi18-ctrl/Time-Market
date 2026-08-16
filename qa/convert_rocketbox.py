@@ -17,7 +17,6 @@ avatar_arm = max(avatar_armatures, key=lambda o: len(o.data.bones))
 print('AVATAR_ARMATURE', avatar_arm.name, 'BONES', len(avatar_arm.data.bones))
 print('ROOT_BONES', [b.name for b in avatar_arm.data.bones if b.parent is None])
 
-# Infer the Rocketbox texture prefix directly from the imported material names.
 prefix = None
 for mat in bpy.data.materials:
     if mat and '_' in mat.name:
@@ -79,8 +78,6 @@ def rebuild_material(mat, kind):
         tex.location = (-430, 90)
         nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
         if kind == 'opacity':
-            # Rocketbox's opacity sheet contains hair/eyebrow/eyelash geometry.
-            # Use either image alpha or luminance as a conservative alpha mask.
             nt.links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
 
     if normal_img:
@@ -140,8 +137,6 @@ def import_motion(path, clip_name):
     action.use_fake_user = True
     print('ACTION', clip_name, 'FCURVES', len(action.fcurves), 'RANGE', tuple(action.frame_range))
 
-    # Critical: remove ALL pelvis translation channels. Leaving the third channel
-    # caused the previous QA models to shoot out of frame / sink into the ground.
     if root_name:
         root_loc = f'pose.bones["{root_name}"].location'
         removed = 0
@@ -151,11 +146,13 @@ def import_motion(path, clip_name):
                 removed += 1
         print('REMOVED_ROOT_LOCATION_CURVES', clip_name, removed)
 
-    # Also discard object-level translation if the FBX importer stored motion there.
+    removed_object = []
     for fc in list(action.fcurves):
         if fc.data_path == 'location':
+            removed_object.append(fc.array_index)
             action.fcurves.remove(fc)
-            print('REMOVED_OBJECT_LOCATION_CURVE', clip_name, fc.array_index)
+    for idx in removed_object:
+        print('REMOVED_OBJECT_LOCATION_CURVE', clip_name, idx)
 
     for o in new_objs:
         bpy.data.objects.remove(o, do_unlink=True)
