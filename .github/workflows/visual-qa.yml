@@ -25,11 +25,12 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Download realistic market HDRI
+      - name: Download realistic market lighting and background
         run: |
           mkdir -p qa-assets/hdri
           curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/leadenhall_market_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/leadenhall_market_1k.hdr'
-          ls -lh qa-assets/hdri/leadenhall_market_1k.hdr
+          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/leadenhall_market.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/leadenhall_market.jpg'
+          ls -lh qa-assets/hdri/
       - name: Download original Rocketbox humans, textures and motions
         run: |
           set -e
@@ -50,12 +51,12 @@ jobs:
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real Build 12 gameplay QA
+      - name: Capture real Build 13 gameplay QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: time-market-build12-visual-qa
+          name: time-market-build13-visual-qa
           path: qa-output/
           retention-days: 7
