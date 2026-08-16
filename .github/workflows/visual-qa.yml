@@ -27,9 +27,11 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Prepare historic hidden-market environment
         run: |
+          set -e
+          fetch(){ curl -L --fail --retry 6 --retry-all-errors --retry-delay 2 -o "$1" "$2"; }
           mkdir -p qa-assets/hdri
-          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/braustuble_alley_4k.hdr'
-          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/braustuble_alley.jpg'
+          fetch qa-assets/hdri/vignaioli_night_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/braustuble_alley_4k.hdr'
+          fetch qa-assets/hdri/vignaioli_night.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/braustuble_alley.jpg'
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from PIL import Image, ImageEnhance, ImageChops
@@ -38,84 +40,87 @@ jobs:
           im=ImageEnhance.Brightness(im).enhance(0.38)
           im=ImageEnhance.Contrast(im).enhance(1.22)
           im=ImageEnhance.Color(im).enhance(0.82)
-          tint=Image.new('RGB',im.size,(206,220,246))
-          im=ImageChops.multiply(im,tint)
+          im=ImageChops.multiply(im,Image.new('RGB',im.size,(206,220,246)))
           im.save(p,quality=94,optimize=True)
           PY
       - name: Download PBR market materials
         run: |
           set -e
+          fetch(){ curl -L --fail --retry 6 --retry-all-errors --retry-delay 2 -o "$1" "$2"; }
           mkdir -p qa-assets/textures
-          curl -L --fail --retry 3 -o qa-assets/textures/wood_diff.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_diff_1k.jpg'
-          curl -L --fail --retry 3 -o qa-assets/textures/wood_nor.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_nor_gl_1k.jpg'
-          curl -L --fail --retry 3 -o qa-assets/textures/wood_rough.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_rough_1k.jpg'
-          curl -L --fail --retry 3 -o qa-assets/textures/cobble_diff.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_diff_1k.jpg'
-          curl -L --fail --retry 3 -o qa-assets/textures/cobble_nor.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_nor_gl_1k.jpg'
-          curl -L --fail --retry 3 -o qa-assets/textures/cobble_rough.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_rough_1k.jpg'
-      - name: Download player merchant and diverse NPCs
+          fetch qa-assets/textures/wood_diff.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_diff_1k.jpg'
+          fetch qa-assets/textures/wood_nor.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_nor_gl_1k.jpg'
+          fetch qa-assets/textures/wood_rough.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_rough_1k.jpg'
+          fetch qa-assets/textures/cobble_diff.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_diff_1k.jpg'
+          fetch qa-assets/textures/cobble_nor.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_nor_gl_1k.jpg'
+          fetch qa-assets/textures/cobble_rough.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_rough_1k.jpg'
+      - name: Download player hooded merchant and diverse NPCs
         run: |
           set -e
+          fetch(){ curl -L --fail --retry 6 --retry-all-errors --retry-delay 2 -o "$1" "$2"; }
           base='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults'
           anim='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Animations/all_animations_max_motextr_xy'
           mkdir -p qa-assets/rocket/player/{Export,Textures} qa-assets/rocket/merchant/{Export,Textures} qa-assets/rocket/female/{Export,Textures} qa-assets/rocket/npcm/{Export,Textures} qa-assets/rocket/npcf/{Export,Textures} qa-assets/rocket/anims
-          curl -L --fail --retry 3 -o qa-assets/rocket/player/Export/Male_Adult_03.fbx "$base/Male_Adult_07/Export/Male_Adult_07.fbx"
-          curl -L --fail --retry 3 -o qa-assets/rocket/player/Textures/m004_body_color.tga "$base/Male_Adult_07/Textures/m013_body_color.tga"
-          curl -L --fail --retry 3 -o qa-assets/rocket/player/Textures/m004_body_normal.tga "$base/Male_Adult_07/Textures/m013_body_normal.tga"
-          curl -L --fail --retry 3 -o qa-assets/rocket/player/Textures/m004_head_color.tga "$base/Male_Adult_07/Textures/m013_head_color.tga"
-          curl -L --fail --retry 3 -o qa-assets/rocket/player/Textures/m004_head_normal.tga "$base/Male_Adult_07/Textures/m013_head_normal.tga"
-          curl -L --fail --retry 3 -o qa-assets/rocket/player/Textures/m004_opacity_color.tga "$base/Male_Adult_07/Textures/m013_opacity_color.tga"
-          curl -L --fail --retry 3 -o qa-assets/rocket/merchant/Export/Male_Adult_19.fbx "$base/Male_Adult_19/Export/Male_Adult_19.fbx"
-          for f in m250_body_color.tga m250_body_normal.tga m250_head_color.tga m250_head_normal.tga m250_keffiyeh_color.tga m250_keffiyeh_normal.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/merchant/Textures/$f" "$base/Male_Adult_19/Textures/$f"; done
-          curl -L --fail --retry 3 -o qa-assets/rocket/female/Export/Female_Adult_01.fbx "$base/Female_Adult_01/Export/Female_Adult_01.fbx"
-          for f in f001_body_color.tga f001_body_normal.tga f001_head_color.tga f001_head_normal.tga f001_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/female/Textures/$f" "$base/Female_Adult_01/Textures/$f"; done
-          curl -L --fail --retry 3 -o qa-assets/rocket/npcm/Export/Male_Adult_04.fbx "$base/Male_Adult_04/Export/Male_Adult_04.fbx"
-          for f in m006_body_color.tga m006_body_normal.tga m006_head_color.tga m006_head_normal.tga m006_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/npcm/Textures/$f" "$base/Male_Adult_04/Textures/$f"; done
-          curl -L --fail --retry 3 -o qa-assets/rocket/npcf/Export/Female_Adult_04.fbx "$base/Female_Adult_04/Export/Female_Adult_04.fbx"
-          for f in f004_body_color.tga f004_body_normal.tga f004_head_color.tga f004_head_normal.tga f004_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/npcf/Textures/$f" "$base/Female_Adult_04/Textures/$f"; done
-          curl -L --fail --retry 3 -o qa-assets/rocket/anims/m_walk.fbx "$anim/m_walk_neutral.max.fbx"
-          curl -L --fail --retry 3 -o qa-assets/rocket/anims/m_run.fbx "$anim/m_run_neutral.max.fbx"
-          curl -L --fail --retry 3 -o qa-assets/rocket/anims/f_walk.fbx "$anim/f_walk_neutral.max.fbx"
-      - name: Patch Build 20 density and framing
+          fetch qa-assets/rocket/player/Export/Male_Adult_03.fbx "$base/Male_Adult_07/Export/Male_Adult_07.fbx"
+          fetch qa-assets/rocket/player/Textures/m004_body_color.tga "$base/Male_Adult_07/Textures/m013_body_color.tga"
+          fetch qa-assets/rocket/player/Textures/m004_body_normal.tga "$base/Male_Adult_07/Textures/m013_body_normal.tga"
+          fetch qa-assets/rocket/player/Textures/m004_head_color.tga "$base/Male_Adult_07/Textures/m013_head_color.tga"
+          fetch qa-assets/rocket/player/Textures/m004_head_normal.tga "$base/Male_Adult_07/Textures/m013_head_normal.tga"
+          fetch qa-assets/rocket/player/Textures/m004_opacity_color.tga "$base/Male_Adult_07/Textures/m013_opacity_color.tga"
+          fetch qa-assets/rocket/merchant/Export/Male_Adult_18.fbx "$base/Male_Adult_18/Export/Male_Adult_18.fbx"
+          fetch qa-assets/rocket/merchant/Textures/m023_body_color.tga "$base/Male_Adult_18/Textures/m023_body_color.tga"
+          fetch qa-assets/rocket/merchant/Textures/m023_body_normal.tga "$base/Male_Adult_18/Textures/m023_body_normal.tga"
+          fetch qa-assets/rocket/merchant/Textures/m023_head_color.tga "$base/Male_Adult_18/Textures/m023_head_color.tga"
+          fetch qa-assets/rocket/merchant/Textures/m023_head_normal.tga "$base/Male_Adult_18/Textures/m023_head_normal.tga"
+          cp qa-assets/rocket/merchant/Textures/m023_body_color.tga qa-assets/rocket/merchant/Textures/m023_opacity_color.tga
+          fetch qa-assets/rocket/female/Export/Female_Adult_01.fbx "$base/Female_Adult_01/Export/Female_Adult_01.fbx"
+          for f in f001_body_color.tga f001_body_normal.tga f001_head_color.tga f001_head_normal.tga f001_opacity_color.tga; do fetch "qa-assets/rocket/female/Textures/$f" "$base/Female_Adult_01/Textures/$f"; done
+          fetch qa-assets/rocket/npcm/Export/Male_Adult_04.fbx "$base/Male_Adult_04/Export/Male_Adult_04.fbx"
+          for f in m006_body_color.tga m006_body_normal.tga m006_head_color.tga m006_head_normal.tga m006_opacity_color.tga; do fetch "qa-assets/rocket/npcm/Textures/$f" "$base/Male_Adult_04/Textures/$f"; done
+          fetch qa-assets/rocket/npcf/Export/Female_Adult_04.fbx "$base/Female_Adult_04/Export/Female_Adult_04.fbx"
+          for f in f004_body_color.tga f004_body_normal.tga f004_head_color.tga f004_head_normal.tga f004_opacity_color.tga; do fetch "qa-assets/rocket/npcf/Textures/$f" "$base/Female_Adult_04/Textures/$f"; done
+          fetch qa-assets/rocket/anims/m_walk.fbx "$anim/m_walk_neutral.max.fbx"
+          fetch qa-assets/rocket/anims/m_run.fbx "$anim/m_run_neutral.max.fbx"
+          fetch qa-assets/rocket/anims/f_walk.fbx "$anim/f_walk_neutral.max.fbx"
+      - name: Patch Build 21 hooded merchant and depth
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('qa/build18.html')
           s=p.read_text()
-          # Keep the successful Build 19 framing.
-          s=s.replace("new THREE.PlaneGeometry(2.35,.71)","new THREE.PlaneGeometry(1.78,.54)")
-          s=s.replace("sign('تاجر السنوات',.62,2.62,-.35,-.1);","sign('تاجر السنوات',.52,2.52,-.42,-.08);")
-          s=s.replace("place(mo,.62,-.08,-2.72,1.77)","place(mo,.72,-1.02,.08,1.77)")
-          s=s.replace("place(fo,-.65,-2.55,0,1.69)","place(fo,-.72,-3.15,0,1.69)")
-          s=s.replace("camera.position.set(.5,1.95,7.0)","camera.position.set(.38,1.9,7.15)")
-          s=s.replace("cam.set(player.position.x+.48,1.9,player.position.z+2.8)","cam.set(player.position.x+.36,1.88,player.position.z+2.95)")
+          # Smaller sign and more open over-the-shoulder framing.
+          s=s.replace("new THREE.PlaneGeometry(2.35,.71)","new THREE.PlaneGeometry(1.62,.49)")
+          s=s.replace("sign('تاجر السنوات',.62,2.62,-.35,-.1);","sign('تاجر السنوات',1.04,2.48,-.42,-.12);")
+          s=s.replace("camera.position.set(.5,1.95,7.0)","camera.position.set(.25,1.88,7.18)")
+          s=s.replace("cam.set(player.position.x+.48,1.9,player.position.z+2.8)","cam.set(player.position.x+.24,1.86,player.position.z+3.02)")
+          # Move the detailed merchant stall to the right so the lane remains visible behind it.
+          s=s.replace("g.position.set(.78,0,-.55);g.rotation.y=-.12;scene.add(g);lantern(.15,2.23,-.65,5.0);hourglass(.53,1.05,-.43,.9);hourglass(.82,1.06,-.41,.75);hourglass(1.1,1.05,-.43,.86)","g.position.set(1.18,0,-.55);g.rotation.y=-.12;scene.add(g);lantern(.55,2.23,-.65,5.0);hourglass(.93,1.05,-.43,.9);hourglass(1.22,1.06,-.41,.75);hourglass(1.5,1.05,-.43,.86)")
           old="const [po,mo,fo,mw,mr,fw]=await Promise.all([standardHuman('player','Male_Adult_03.fbx','m004',0x746961),merchantHuman(),standardHuman('female','Female_Adult_01.fbx','f001',0x5d514d),fload('/qa-assets/rocket/anims/m_walk.fbx'),fload('/qa-assets/rocket/anims/m_run.fbx'),fload('/qa-assets/rocket/anims/f_walk.fbx')]);"
-          new="const [po,mo,fo,nm,nf,mw,mr,fw]=await Promise.all([standardHuman('player','Male_Adult_03.fbx','m004',0x746961),merchantHuman(),standardHuman('female','Female_Adult_01.fbx','f001',0x5d514d),standardHuman('npcm','Male_Adult_04.fbx','m006',0x625954),standardHuman('npcf','Female_Adult_04.fbx','f004',0x665854),fload('/qa-assets/rocket/anims/m_walk.fbx'),fload('/qa-assets/rocket/anims/m_run.fbx'),fload('/qa-assets/rocket/anims/f_walk.fbx')]);"
+          new="const [po,mo,fo,nm,nf,mw,mr,fw]=await Promise.all([standardHuman('player','Male_Adult_03.fbx','m004',0x746961),standardHuman('merchant','Male_Adult_18.fbx','m023',0x786f68),standardHuman('female','Female_Adult_01.fbx','f001',0x5d514d),standardHuman('npcm','Male_Adult_04.fbx','m006',0x625954),standardHuman('npcf','Female_Adult_04.fbx','f004',0x665854),fload('/qa-assets/rocket/anims/m_walk.fbx'),fload('/qa-assets/rocket/anims/m_run.fbx'),fload('/qa-assets/rocket/anims/f_walk.fbx')]);"
           if old not in s: raise SystemExit('human load anchor missing')
           s=s.replace(old,new)
-          old="female=place(fo,-.72,-3.15,0,1.69);const walk="
-          new="female=place(fo,-.72,-3.15,0,1.69),npcM=place(nm,.82,-5.25,Math.PI,1.74),npcF=place(nf,-.78,-6.55,0,1.68);const walk="
+          old="const player=place(po,0,4.2,Math.PI,1.79),merchant=place(mo,.62,-.08,-2.72,1.77),female=place(fo,-.65,-2.55,0,1.69);const walk="
+          new="const player=place(po,0,4.2,Math.PI,1.79),merchant=place(mo,1.16,-.98,.06,1.77),female=place(fo,-.82,-3.25,0,1.69),npcM=place(nm,.78,-5.15,Math.PI,1.74),npcF=place(nf,-.76,-6.45,0,1.68);const walk="
           if old not in s: raise SystemExit('placement anchor missing')
           s=s.replace(old,new)
           old="const fmix=new THREE.AnimationMixer(fo),fa=fmix.clipAction(fwalk);fa.play();"
-          new=old+"const nmmix=new THREE.AnimationMixer(nm),nma=nmmix.clipAction(walk);nma.play();nmmix.update(.38);nma.paused=true;const nfmix=new THREE.AnimationMixer(nf),nfa=nfmix.clipAction(fwalk);nfa.play();nfmix.update(.61);nfa.paused=true;"
-          if old not in s: raise SystemExit('mixer anchor missing')
+          new=old+"const nmmix=new THREE.AnimationMixer(nm),nma=nmmix.clipAction(walk);nma.play();nmmix.update(.40);nma.paused=true;const nfmix=new THREE.AnimationMixer(nf),nfa=nfmix.clipAction(fwalk);nfa.play();nfmix.update(.58);nfa.paused=true;"
           s=s.replace(old,new)
           density="""
           function distantStall(x,z,side,scale=.72){
             const g=new THREE.Group();
-            const top=new THREE.Mesh(new RoundedBoxGeometry(1.15,.10,.50,3,.025),woodMat);top.position.y=.70;top.castShadow=true;g.add(top);
-            for(const xx of [-.43,.43]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.035,.05,.66,8),woodMat);leg.position.set(xx,.34,0);g.add(leg);}
-            const awg=new THREE.PlaneGeometry(1.55,.85,7,4),pa=awg.attributes.position;for(let i=0;i<pa.count;i++)pa.setZ(i,-.05*Math.cos(pa.getX(i)*3));
-            const aw=new THREE.Mesh(awg,fabric);aw.position.set(0,1.43,-side*.10);aw.rotation.x=-1.05;g.add(aw);
-            for(let i=0;i<5;i++){const q=new THREE.Mesh(i%2?new THREE.CylinderGeometry(.03,.05,.12,8):new THREE.SphereGeometry(.045,8,6),i%3===0?brass:new THREE.MeshStandardMaterial({color:i%2?0x283b36:0x46282a,roughness:.58}));q.position.set(-.36+i*.18,.80,(i%2?-.07:.08));g.add(q);}
-            g.position.set(x,0,z);g.rotation.y=side*.16;g.scale.setScalar(scale);scene.add(g);return g;
+            const top=new THREE.Mesh(new RoundedBoxGeometry(1.12,.10,.48,3,.025),woodMat);top.position.y=.69;top.castShadow=true;g.add(top);
+            for(const xx of [-.42,.42]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.034,.05,.64,8),woodMat);leg.position.set(xx,.33,0);g.add(leg);}
+            const awg=new THREE.PlaneGeometry(1.48,.82,7,4),pa=awg.attributes.position;for(let i=0;i<pa.count;i++)pa.setZ(i,-.05*Math.cos(pa.getX(i)*3));
+            const aw=new THREE.Mesh(awg,fabric);aw.position.set(0,1.39,-side*.10);aw.rotation.x=-1.05;g.add(aw);
+            for(let i=0;i<5;i++){const q=new THREE.Mesh(i%2?new THREE.CylinderGeometry(.03,.05,.12,8):new THREE.SphereGeometry(.044,8,6),i%3===0?brass:new THREE.MeshStandardMaterial({color:i%2?0x283b36:0x46282a,roughness:.58}));q.position.set(-.36+i*.18,.79,(i%2?-.07:.08));g.add(q);}
+            g.position.set(x,0,z);g.rotation.y=side*.16;g.scale.setScalar(scale);scene.add(g);
           }
-          distantStall(-1.20,-5.65,1,.78);distantStall(1.17,-6.95,-1,.70);distantStall(-1.05,-8.15,1,.61);distantStall(1.02,-9.25,-1,.55);
-          lantern(-1.38,2.03,-5.72,2.7);lantern(1.35,2.00,-7.00,2.5);lantern(-1.25,1.92,-8.20,2.2);
+          distantStall(-1.15,-4.8,1,.82);distantStall(1.10,-6.15,-1,.70);distantStall(-1.05,-7.55,1,.60);distantStall(.98,-8.75,-1,.52);
+          lantern(-1.35,2.05,-4.9,2.8);lantern(1.30,2.00,-6.2,2.5);lantern(-1.22,1.92,-7.6,2.2);
           const ropeMat=new THREE.MeshStandardMaterial({color:0x29231d,roughness:.9});
-          for(const z of [-4.7,-7.8]){const rope=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,3.0,6),ropeMat);rope.rotation.z=Math.PI/2;rope.position.set(0,2.25,z);scene.add(rope);for(const x of [-.85,0,.85]){const bulb=new THREE.Mesh(new THREE.SphereGeometry(.025,7,5),new THREE.MeshBasicMaterial({color:0xffb85b}));bulb.position.set(x,2.24,z);scene.add(bulb);}}
+          for(const z of [-4.15,-6.95]){const rope=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,2.85,6),ropeMat);rope.rotation.z=Math.PI/2;rope.position.set(0,2.26,z);scene.add(rope);for(const x of [-.78,0,.78]){const bulb=new THREE.Mesh(new THREE.SphereGeometry(.025,7,5),new THREE.MeshBasicMaterial({color:0xffb75a}));bulb.position.set(x,2.25,z);scene.add(bulb);}}
           """
-          if 'sideCart();' not in s: raise SystemExit('market density anchor missing')
           s=s.replace('sideCart();','sideCart();'+density)
           p.write_text(s)
           PY
@@ -123,12 +128,12 @@ jobs:
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real Build 20 gameplay QA
+      - name: Capture real Build 21 gameplay QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: time-market-build20-visual-qa
+          name: time-market-build21-visual-qa
           path: qa-output/
           retention-days: 7
