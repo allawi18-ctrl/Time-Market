@@ -5,7 +5,6 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'index.html'
       - 'qa/**'
       - '.github/workflows/visual-qa.yml'
 
@@ -15,7 +14,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,48 +25,31 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Cache high-detail Sponza architecture
-        run: |
-          git clone --depth 1 --filter=blob:none --sparse https://github.com/KhronosGroup/glTF-Sample-Assets.git /tmp/gltf-assets
-          cd /tmp/gltf-assets
-          git sparse-checkout set Models/Sponza/glTF
-          mkdir -p "$GITHUB_WORKSPACE/qa-assets/sponza"
-          cp -R Models/Sponza/glTF/. "$GITHUB_WORKSPACE/qa-assets/sponza/"
-      - name: Download Rocketbox humans and native motion
+      - name: Download Rocketbox humans and textures
         run: |
           set -e
           base='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults'
-          anim='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Animations/all_animations_max_motextr_xy'
-          mkdir -p qa-assets/rocket/player/{Export,Textures} qa-assets/rocket/merchant/{Export,Textures} qa-assets/rocket/female/{Export,Textures} qa-assets/rocket/anims
+          mkdir -p qa-assets/rocket/player/{Export,Textures} qa-assets/rocket/merchant/{Export,Textures} qa-assets/rocket/female/{Export,Textures}
           curl -L --fail --retry 3 -o qa-assets/rocket/player/Export/Male_Adult_01.fbx "$base/Male_Adult_01/Export/Male_Adult_01.fbx"
           for f in m002_body_color.tga m002_body_normal.tga m002_head_color.tga m002_head_normal.tga m002_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/player/Textures/$f" "$base/Male_Adult_01/Textures/$f"; done
           curl -L --fail --retry 3 -o qa-assets/rocket/merchant/Export/Male_Adult_02.fbx "$base/Male_Adult_02/Export/Male_Adult_02.fbx"
           for f in m003_body_color.tga m003_body_normal.tga m003_head_color.tga m003_head_normal.tga m003_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/merchant/Textures/$f" "$base/Male_Adult_02/Textures/$f"; done
           curl -L --fail --retry 3 -o qa-assets/rocket/female/Export/Female_Adult_01.fbx "$base/Female_Adult_01/Export/Female_Adult_01.fbx"
           for f in f001_body_color.tga f001_body_normal.tga f001_head_color.tga f001_head_normal.tga f001_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/female/Textures/$f" "$base/Female_Adult_01/Textures/$f"; done
-          curl -L --fail --retry 3 -o qa-assets/rocket/anims/m_walk.fbx "$anim/m_walk_neutral.max.fbx"
-          curl -L --fail --retry 3 -o qa-assets/rocket/anims/m_run.fbx "$anim/m_run_neutral.max.fbx"
-          curl -L --fail --retry 3 -o qa-assets/rocket/anims/f_walk.fbx "$anim/f_walk_neutral.max.fbx"
-          curl -L --fail --retry 3 -o qa-assets/rocket/anims/f_run.fbx "$anim/f_run_neutral.max.fbx"
-          du -sh qa-assets/rocket
-      - name: Convert Rocketbox humans to static and animated GLB
+      - name: Convert humans without bone-axis rewriting
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy
           export PYTHONPATH=/usr/lib/python3/dist-packages
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player-static.glb
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant-static.glb
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female-static.glb
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player.glb qa-assets/rocket/anims/m_walk.fbx qa-assets/rocket/anims/m_run.fbx
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant.glb qa-assets/rocket/anims/m_walk.fbx qa-assets/rocket/anims/m_run.fbx
-          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female.glb qa-assets/rocket/anims/f_walk.fbx qa-assets/rocket/anims/f_run.fbx
-          ls -lh qa-assets/rocket/*.glb
+          blender -b --python qa/convert_rocketbox_static_noauto.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player-static.glb
+          blender -b --python qa/convert_rocketbox_static_noauto.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant-static.glb
+          blender -b --python qa/convert_rocketbox_static_noauto.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female-static.glb
+          ls -lh qa-assets/rocket/*-static.glb
       - name: Run local server
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
-          echo $! > /tmp/time-market-server.pid
           sleep 2
-      - name: Capture real in-game human QA
+      - name: Capture real human integrity QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
