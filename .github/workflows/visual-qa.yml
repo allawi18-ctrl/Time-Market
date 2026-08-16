@@ -14,7 +14,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,14 +25,11 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Cache high-detail Sponza architecture
+      - name: Download realistic market HDRI
         run: |
-          git clone --depth 1 --filter=blob:none --sparse https://github.com/KhronosGroup/glTF-Sample-Assets.git /tmp/gltf-assets
-          cd /tmp/gltf-assets
-          git sparse-checkout set Models/Sponza/glTF
-          mkdir -p "$GITHUB_WORKSPACE/qa-assets/sponza"
-          cp -R Models/Sponza/glTF/. "$GITHUB_WORKSPACE/qa-assets/sponza/"
-          du -sh "$GITHUB_WORKSPACE/qa-assets/sponza"
+          mkdir -p qa-assets/hdri
+          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/leadenhall_market_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/leadenhall_market_1k.hdr'
+          ls -lh qa-assets/hdri/leadenhall_market_1k.hdr
       - name: Download original Rocketbox humans, textures and motions
         run: |
           set -e
@@ -53,12 +50,12 @@ jobs:
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real Build 09 gameplay QA
+      - name: Capture real Build 12 gameplay QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: time-market-build09-visual-qa
+          name: time-market-build12-visual-qa
           path: qa-output/
           retention-days: 7
