@@ -14,7 +14,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,7 +42,17 @@ jobs:
           im=ImageChops.multiply(im,tint)
           im.save(p,quality=94,optimize=True)
           PY
-          ls -lh qa-assets/hdri/
+      - name: Download PBR market materials
+        run: |
+          set -e
+          mkdir -p qa-assets/textures
+          curl -L --fail --retry 3 -o qa-assets/textures/wood_diff.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_diff_1k.jpg'
+          curl -L --fail --retry 3 -o qa-assets/textures/wood_nor.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_nor_gl_1k.jpg'
+          curl -L --fail --retry 3 -o qa-assets/textures/wood_rough.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_worn/wood_table_worn_rough_1k.jpg'
+          curl -L --fail --retry 3 -o qa-assets/textures/cobble_diff.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_diff_1k.jpg'
+          curl -L --fail --retry 3 -o qa-assets/textures/cobble_nor.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_nor_gl_1k.jpg'
+          curl -L --fail --retry 3 -o qa-assets/textures/cobble_rough.jpg 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_07/cobblestone_floor_07_rough_1k.jpg'
+          ls -lh qa-assets/textures
       - name: Download better Rocketbox humans and motions
         run: |
           set -e
@@ -63,12 +73,12 @@ jobs:
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real Build 17 gameplay QA
+      - name: Capture real Build 18 gameplay QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: time-market-build17-visual-qa
+          name: time-market-build18-visual-qa
           path: qa-output/
           retention-days: 7
