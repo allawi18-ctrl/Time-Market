@@ -50,11 +50,14 @@ jobs:
           curl -L --fail --retry 3 -o qa-assets/rocket/anims/f_walk.fbx "$anim/f_walk_neutral.max.fbx"
           curl -L --fail --retry 3 -o qa-assets/rocket/anims/f_run.fbx "$anim/f_run_neutral.max.fbx"
           du -sh qa-assets/rocket
-      - name: Convert Rocketbox humans to animated GLB
+      - name: Convert Rocketbox humans to static and animated GLB
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy
           export PYTHONPATH=/usr/lib/python3/dist-packages
+          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player-static.glb
+          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant-static.glb
+          blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female-static.glb
           blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player.glb qa-assets/rocket/anims/m_walk.fbx qa-assets/rocket/anims/m_run.fbx
           blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant.glb qa-assets/rocket/anims/m_walk.fbx qa-assets/rocket/anims/m_run.fbx
           blender -b --python qa/convert_rocketbox.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female.glb qa-assets/rocket/anims/f_walk.fbx qa-assets/rocket/anims/f_run.fbx
