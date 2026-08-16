@@ -25,22 +25,22 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Prepare narrow cobblestone night environment
+      - name: Prepare historic hidden-market environment
         run: |
           mkdir -p qa-assets/hdri
-          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/cobblestone_street_night_4k.hdr'
-          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/cobblestone_street_night.jpg'
+          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night_1k.hdr 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/braustuble_alley_4k.hdr'
+          curl -L --fail --retry 3 --max-time 180 -o qa-assets/hdri/vignaioli_night.jpg 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/braustuble_alley.jpg'
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from PIL import Image, ImageEnhance, ImageChops
           p='qa-assets/hdri/vignaioli_night.jpg'
           im=Image.open(p).convert('RGB')
-          im=ImageEnhance.Brightness(im).enhance(0.52)
-          im=ImageEnhance.Contrast(im).enhance(1.20)
-          im=ImageEnhance.Color(im).enhance(0.88)
-          tint=Image.new('RGB',im.size,(220,228,245))
+          im=ImageEnhance.Brightness(im).enhance(0.38)
+          im=ImageEnhance.Contrast(im).enhance(1.22)
+          im=ImageEnhance.Color(im).enhance(0.82)
+          tint=Image.new('RGB',im.size,(206,220,246))
           im=ImageChops.multiply(im,tint)
-          im.save(p,quality=93,optimize=True)
+          im.save(p,quality=94,optimize=True)
           PY
           ls -lh qa-assets/hdri/
       - name: Download better Rocketbox humans and motions
@@ -63,12 +63,12 @@ jobs:
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real Build 16 gameplay QA
+      - name: Capture real Build 17 gameplay QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: time-market-build16-visual-qa
+          name: time-market-build17-visual-qa
           path: qa-output/
           retention-days: 7
