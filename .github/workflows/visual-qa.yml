@@ -1,0 +1,41 @@
+name: Visual QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'index.html'
+      - 'qa/**'
+      - '.github/workflows/visual-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright@1.54.2
+          npx playwright install --with-deps chromium
+      - name: Run local server
+        run: |
+          python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
+          echo $! > /tmp/time-market-server.pid
+          sleep 2
+      - name: Capture real in-game screenshot and video
+        run: node qa/visual-qa.mjs
+      - name: Upload visual QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: time-market-visual-qa
+          path: qa-output/
+          retention-days: 7
