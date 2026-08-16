@@ -15,7 +15,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,7 +36,14 @@ jobs:
           curl -L --fail --retry 3 --max-time 180 -o qa-assets/idle.glb 'https://raw.githubusercontent.com/readyplayerme/animation-library/master/masculine/glb/idle/M_Standing_Idle_001.glb'
           curl -L --fail --retry 3 --max-time 180 -o qa-assets/walk.glb 'https://raw.githubusercontent.com/readyplayerme/animation-library/master/masculine/glb/locomotion/M_Walk_001.glb'
           curl -L --fail --retry 3 --max-time 180 -o qa-assets/run.glb 'https://raw.githubusercontent.com/readyplayerme/animation-library/master/masculine/glb/locomotion/M_Run_001.glb'
-          ls -lh qa-assets
+      - name: Cache high-detail Sponza architecture
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/KhronosGroup/glTF-Sample-Assets.git /tmp/gltf-assets
+          cd /tmp/gltf-assets
+          git sparse-checkout set Models/Sponza/glTF
+          mkdir -p "$GITHUB_WORKSPACE/qa-assets/sponza"
+          cp -R Models/Sponza/glTF/. "$GITHUB_WORKSPACE/qa-assets/sponza/"
+          du -sh "$GITHUB_WORKSPACE/qa-assets/sponza"
       - name: Run local server
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
