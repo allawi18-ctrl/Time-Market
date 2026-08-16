@@ -26,6 +26,15 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
+      - name: Cache visual-slice humans and motion locally
+        run: |
+          mkdir -p qa-assets
+          curl -L --fail --retry 3 --max-time 120 -o qa-assets/player.glb 'https://models.readyplayer.me/6185a4acfb622cf1cdc49348.glb?quality=high&textureSizeLimit=1024&textureAtlas=1024'
+          curl -L --fail --retry 3 --max-time 120 -o qa-assets/merchant.glb 'https://models.readyplayer.me/65a8dba831b23abb4f401bae.glb?quality=high&textureSizeLimit=1024&textureAtlas=1024'
+          curl -L --fail --retry 3 --max-time 120 -o qa-assets/idle.glb 'https://raw.githubusercontent.com/readyplayerme/animation-library/master/masculine/glb/idle/M_Standing_Idle_001.glb'
+          curl -L --fail --retry 3 --max-time 120 -o qa-assets/walk.glb 'https://raw.githubusercontent.com/readyplayerme/animation-library/master/masculine/glb/locomotion/M_Walk_001.glb'
+          curl -L --fail --retry 3 --max-time 120 -o qa-assets/run.glb 'https://raw.githubusercontent.com/readyplayerme/animation-library/master/masculine/glb/locomotion/M_Run_001.glb'
+          ls -lh qa-assets
       - name: Run local server
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
@@ -34,6 +43,7 @@ jobs:
       - name: Capture real in-game screenshot and video
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: time-market-visual-qa
