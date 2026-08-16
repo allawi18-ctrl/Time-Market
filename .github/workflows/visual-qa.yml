@@ -14,7 +14,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,7 +25,7 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Download Rocketbox humans and textures
+      - name: Download original Rocketbox FBX humans and textures
         run: |
           set -e
           base='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults'
@@ -36,20 +36,12 @@ jobs:
           for f in m003_body_color.tga m003_body_normal.tga m003_head_color.tga m003_head_normal.tga m003_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/merchant/Textures/$f" "$base/Male_Adult_02/Textures/$f"; done
           curl -L --fail --retry 3 -o qa-assets/rocket/female/Export/Female_Adult_01.fbx "$base/Female_Adult_01/Export/Female_Adult_01.fbx"
           for f in f001_body_color.tga f001_body_normal.tga f001_head_color.tga f001_head_normal.tga f001_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/female/Textures/$f" "$base/Female_Adult_01/Textures/$f"; done
-      - name: Convert humans without bone-axis rewriting
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y blender python3-numpy
-          export PYTHONPATH=/usr/lib/python3/dist-packages
-          blender -b --python qa/convert_rocketbox_static_noauto.py -- qa-assets/rocket/player/Export/Male_Adult_01.fbx qa-assets/rocket/player-static.glb
-          blender -b --python qa/convert_rocketbox_static_noauto.py -- qa-assets/rocket/merchant/Export/Male_Adult_02.fbx qa-assets/rocket/merchant-static.glb
-          blender -b --python qa/convert_rocketbox_static_noauto.py -- qa-assets/rocket/female/Export/Female_Adult_01.fbx qa-assets/rocket/female-static.glb
-          ls -lh qa-assets/rocket/*-static.glb
+          du -sh qa-assets/rocket
       - name: Run local server
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real human integrity QA
+      - name: Capture real source-FBX human QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
