@@ -25,23 +25,27 @@ jobs:
           npm init -y
           npm install playwright@1.54.2
           npx playwright install --with-deps chromium
-      - name: Download original Rocketbox FBX humans and textures
+      - name: Download original Rocketbox FBX humans, textures and motions
         run: |
           set -e
           base='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults'
-          mkdir -p qa-assets/rocket/player/{Export,Textures} qa-assets/rocket/merchant/{Export,Textures} qa-assets/rocket/female/{Export,Textures}
+          anim='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Animations/all_animations_max_motextr_xy'
+          mkdir -p qa-assets/rocket/player/{Export,Textures} qa-assets/rocket/merchant/{Export,Textures} qa-assets/rocket/female/{Export,Textures} qa-assets/rocket/anims
           curl -L --fail --retry 3 -o qa-assets/rocket/player/Export/Male_Adult_01.fbx "$base/Male_Adult_01/Export/Male_Adult_01.fbx"
           for f in m002_body_color.tga m002_body_normal.tga m002_head_color.tga m002_head_normal.tga m002_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/player/Textures/$f" "$base/Male_Adult_01/Textures/$f"; done
           curl -L --fail --retry 3 -o qa-assets/rocket/merchant/Export/Male_Adult_02.fbx "$base/Male_Adult_02/Export/Male_Adult_02.fbx"
           for f in m003_body_color.tga m003_body_normal.tga m003_head_color.tga m003_head_normal.tga m003_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/merchant/Textures/$f" "$base/Male_Adult_02/Textures/$f"; done
           curl -L --fail --retry 3 -o qa-assets/rocket/female/Export/Female_Adult_01.fbx "$base/Female_Adult_01/Export/Female_Adult_01.fbx"
           for f in f001_body_color.tga f001_body_normal.tga f001_head_color.tga f001_head_normal.tga f001_opacity_color.tga; do curl -L --fail --retry 3 -o "qa-assets/rocket/female/Textures/$f" "$base/Female_Adult_01/Textures/$f"; done
+          curl -L --fail --retry 3 -o qa-assets/rocket/anims/m_walk.fbx "$anim/m_walk_neutral.max.fbx"
+          curl -L --fail --retry 3 -o qa-assets/rocket/anims/m_run.fbx "$anim/m_run_neutral.max.fbx"
+          curl -L --fail --retry 3 -o qa-assets/rocket/anims/f_walk.fbx "$anim/f_walk_neutral.max.fbx"
           du -sh qa-assets/rocket
       - name: Run local server
         run: |
           python3 -m http.server 8000 > /tmp/time-market-server.log 2>&1 &
           sleep 2
-      - name: Capture real source-FBX human QA
+      - name: Capture real source-FBX motion QA
         run: node qa/visual-qa.mjs
       - name: Upload visual QA
         if: always()
