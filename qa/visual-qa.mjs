@@ -1,14 +1,47 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
+
 fs.mkdirSync('qa-output',{recursive:true});
 const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
 const context=await browser.newContext({viewport:{width:430,height:932},deviceScaleFactor:1,recordVideo:{dir:'qa-output',size:{width:430,height:932}}});
-const page=await context.newPage();const errors=[];page.on('console',m=>{console.log('[browser]',m.type(),m.text());if(m.type()==='error')errors.push('console: '+m.text())});page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+const page=await context.newPage();
+const errors=[];
+page.on('console',m=>{ if(m.type()==='error') errors.push('console: '+m.text()); });
+page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+
+async function saveCanvas(name){
+  const data=await page.evaluate(()=>document.querySelector('canvas')?.toDataURL('image/png'));
+  if(!data) throw new Error('No canvas frame available');
+  fs.writeFileSync(`qa-output/${name}`,Buffer.from(data.split(',')[1],'base64'));
+}
+
 try{
- await page.goto('http://127.0.0.1:8000/qa/human-fbx-motion-test.html',{waitUntil:'domcontentloaded',timeout:180000});
- await page.waitForFunction(()=>window.__TM_READY__===true,null,{timeout:180000});
- await page.waitForTimeout(2200);
- await page.screenshot({path:'qa-output/human-motion-front.png',fullPage:false,timeout:30000});
- await page.waitForTimeout(5200);
- await page.screenshot({path:'qa-output/human-motion-later.png',fullPage:false,timeout:30000});
-}catch(e){errors.push('qa: '+e.stack);throw e}finally{fs.writeFileSync('qa-output/runtime-errors.txt',errors.length?errors.join('\n'):'NO_RUNTIME_ERRORS');await context.close();await browser.close()}
+  await page.goto('http://127.0.0.1:8000/qa/build08.html',{waitUntil:'domcontentloaded',timeout:180000});
+  await page.waitForFunction(()=>window.__TM_READY__===true,null,{timeout:180000});
+  await page.waitForTimeout(3500);
+  await saveCanvas('build08-ingame-start.png');
+
+  await page.keyboard.down('w');
+  await page.waitForTimeout(2400);
+  await page.keyboard.up('w');
+  await page.waitForTimeout(500);
+  await saveCanvas('build08-ingame-walk.png');
+
+  await page.keyboard.down('Shift');
+  await page.keyboard.down('w');
+  await page.waitForTimeout(1700);
+  await page.keyboard.up('w');
+  await page.keyboard.up('Shift');
+  await page.keyboard.down('d');
+  await page.waitForTimeout(700);
+  await page.keyboard.up('d');
+  await page.waitForTimeout(1200);
+  await saveCanvas('build08-ingame-after-movement.png');
+}catch(e){
+  errors.push('qa: '+e.stack);
+  throw e;
+}finally{
+  fs.writeFileSync('qa-output/runtime-errors.txt',errors.length?errors.join('\n'):'NO_RUNTIME_ERRORS');
+  await context.close();
+  await browser.close();
+}
